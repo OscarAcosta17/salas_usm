@@ -24,7 +24,6 @@
             text-decoration: none;
         }
 
-        /* Contenedor principal dividido en 2 */
         .container {
             display: flex;
             height: calc(100vh - 60px);
@@ -39,50 +38,65 @@
             overflow-y: auto;
         }
 
-        .left-panel h2 {
-            margin-top: 0;
+        .search-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
-        .search-box input {
-            width: 90%;
+        .search-area input {
+            flex: 1;
             padding: 10px;
             font-size: 16px;
         }
 
+        .clear-btn {
+            padding: 10px;
+            cursor: pointer;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
         .result-item {
             background: #ecf0f1;
-            padding: 10px;
+            padding: 12px;
             margin-top: 10px;
             border-radius: 5px;
+        }
+
+        .add-btn {
+            margin-top: 8px;
+            padding: 5px 12px;
+            background: #3498db;
+            border: none;
+            color: white;
             cursor: pointer;
+            border-radius: 4px;
         }
 
-        .result-item:hover {
-            background: #d0d7de;
-        }
-
-        /* Panel derecho - horario */
+        /* Panel derecho */
         .right-panel {
             width: 65%;
             padding: 20px;
-            overflow-x: auto;
+            overflow-y: auto;
         }
 
-        .horario-table {
+        table {
             width: 100%;
             border-collapse: collapse;
             background: white;
         }
 
-        .horario-table th,
-        .horario-table td {
+        th, td {
             border: 1px solid #bbb;
-            text-align: center;
             padding: 10px;
+            text-align: center;
             vertical-align: middle;
         }
 
-        .horario-table th {
+        th {
             background: #3498db;
             color: white;
         }
@@ -90,108 +104,180 @@
         .cell {
             height: 40px;
         }
-    </style>
 
+        .ramo {
+            background: #f9e79f;
+            border-radius: 4px;
+            padding: 2px;
+            display: block;
+            font-size: 14px;
+            margin: 2px 0;
+        }
+    </style>
 </head>
+
 <body>
 
-    <!-- Barra superior -->
-    <div class="topbar">
-        <a href="index.html">Salas USM</a>
-    </div>
+<div class="topbar">
+    <a href="index.html">Salas USM</a>
+</div>
 
-    <div class="container">
+<div class="container">
 
-        <!-- Panel izquierdo -->
-        <div class="left-panel">
-            <h2>Buscar ramo por sigla</h2>
+    <!-- Panel izquierdo -->
+    <div class="left-panel">
 
-            <div class="search-box">
-                <input type="text" id="buscar-ramos" placeholder="Ej: MAT201, ELI328">
-            </div>
+        <h2>Buscar ramo por sigla</h2>
 
-            <div id="resultados-ramos"></div>
+        <div class="search-area">
+            <input type="text" id="buscar" placeholder="Ej: ELI328, MAT201...">
+            <button class="clear-btn" id="limpiar">X</button>
         </div>
 
-        <!-- Panel derecho -->
-        <div class="right-panel">
-            <h2>Horario Semanal</h2>
-
-            <table class="horario-table">
-                <thead>
-                    <tr>
-                        <th>Bloque</th>
-                        <th>Lunes</th>
-                        <th>Martes</th>
-                        <th>Miércoles</th>
-                        <th>Jueves</th>
-                        <th>Viernes</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-horario">
-                    <!-- Se rellenan filas dinámicamente -->
-                </tbody>
-            </table>
-        </div>
+        <div id="resultados"></div>
 
     </div>
 
-    <script>
-        // ------------------------
-        // GENERAR TABLA DE BLOQUES
-        // ------------------------
+    <!-- Panel derecho -->
+    <div class="right-panel">
 
-        const tbody = document.getElementById("tabla-horario");
+        <h2>Horario Semanal</h2>
 
-        const bloques = [
-            "1-2","3-4","5-6","7-8","9-10","11-12","13-14","15-16"
-        ];
+        <table>
+            <thead>
+                <tr>
+                    <th>Bloque</th>
+                    <th>Lunes</th>
+                    <th>Martes</th>
+                    <th>Miércoles</th>
+                    <th>Jueves</th>
+                    <th>Viernes</th>
+                </tr>
+            </thead>
+            <tbody id="tabla">
+            </tbody>
+        </table>
 
-        bloques.forEach(b => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td><b>${b}</b></td>
-                <td class="cell"></td>
-                <td class="cell"></td>
-                <td class="cell"></td>
-                <td class="cell"></td>
-                <td class="cell"></td>
+    </div>
+</div>
+
+
+<script>
+    // ============================================
+    // GENERAR TABLA DE BLOQUES
+    // ============================================
+
+    const bloques = ["1-2","3-4","5-6","7-8","9-10","11-12","13-14","15-16"];
+    const tbody = document.getElementById("tabla");
+
+    bloques.forEach(b => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><b>${b}</b></td>
+            <td class="cell" data-dia="Lunes" data-bloque="${b}"></td>
+            <td class="cell" data-dia="Martes" data-bloque="${b}"></td>
+            <td class="cell" data-dia="Miércoles" data-bloque="${b}"></td>
+            <td class="cell" data-dia="Jueves" data-bloque="${b}"></td>
+            <td class="cell" data-dia="Viernes" data-bloque="${b}"></td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // ============================================
+    // CARGAR JSON CON HORARIOS
+    // ============================================
+
+    let datos = [];
+
+    fetch("/salas_usm/data/salas.json")
+        .then(r => r.json())
+        .then(json => {
+            datos = json; // tu JSON es un arreglo simple
+        });
+
+    // ============================================
+    // MAPEAR HORA → BLOQUE ESTIMADO
+    // ============================================
+
+    function horaABloque(hora) {
+        // Ejemplo: "11:05-12:15"
+        const inicio = hora.split("-")[0];
+        const h = parseInt(inicio.split(":")[0], 10);
+
+        if (h < 9) return "1-2";
+        if (h < 11) return "3-4";
+        if (h < 13) return "5-6";
+        if (h < 15) return "7-8";
+        if (h < 17) return "9-10";
+        if (h < 19) return "11-12";
+        if (h < 21) return "13-14";
+        return "15-16";
+    }
+
+    // ============================================
+    // BUSCAR RAMOS POR SIGLA
+    // ============================================
+
+    const input = document.getElementById("buscar");
+    const limpiarBtn = document.getElementById("limpiar");
+    const resultadosDiv = document.getElementById("resultados");
+
+    limpiarBtn.onclick = () => {
+        input.value = "";
+        resultadosDiv.innerHTML = "";
+    };
+
+    input.addEventListener("input", () => {
+        const q = input.value.toLowerCase();
+        resultadosDiv.innerHTML = "";
+
+        if (q.length < 2) return;
+
+        const encontrados = datos.filter(r => r.SIGLA.toLowerCase().includes(q));
+
+        encontrados.forEach(r => {
+            const div = document.createElement("div");
+            div.className = "result-item";
+            div.innerHTML = `
+                <b>${r.SIGLA}</b> - ${r.NOMBRE}<br>
+                Profesor: ${r.PROFESOR}<br>
+                Paralelo: ${r.PARALELO}<br>
+                <button class="add-btn" data-sigla="${r.SIGLA}" data-paralelo="${r.PARALELO}">
+                    Añadir al horario
+                </button>
             `;
-            tbody.appendChild(tr);
+            resultadosDiv.appendChild(div);
+        });
+    });
+
+    // ============================================
+    // AÑADIR RAMO AL HORARIO
+    // ============================================
+
+    document.addEventListener("click", e => {
+        if (!e.target.classList.contains("add-btn")) return;
+
+        const sigla = e.target.dataset.sigla;
+        const paralelo = e.target.dataset.paralelo;
+
+        // Obtener todos los horarios del ramo
+        const cursos = datos.filter(r => r.SIGLA === sigla && r.PARALELO === paralelo);
+
+        cursos.forEach(r => {
+            const bloque = horaABloque(r.HORA);
+            const celda = document.querySelector(`td[data-dia="${r.DIA}"][data-bloque="${bloque}"]`);
+
+            if (celda) {
+                const tag = document.createElement("span");
+                tag.className = "ramo";
+                tag.textContent = `${r.SIGLA} (${r.SALA})`;
+                celda.appendChild(tag);
+            }
         });
 
-        // ------------------------
-        // BUSCADOR DE RAMOS
-        // ------------------------
+    });
 
-        document.getElementById("buscar-ramos").addEventListener("input", function () {
-            const texto = this.value.toLowerCase();
-            const contenedor = document.getElementById("resultados-ramos");
-            contenedor.innerHTML = "";
-
-            if (texto.length < 2) return;
-
-            // Más adelante aquí cargaremos JSON real
-            // Por ahora agrego resultados falsos para probar
-            const ejemplos = [
-                { sigla: "MAT201", nombre: "Cálculo II" },
-                { sigla: "ELI328", nombre: "Accionamientos Eléctricos I" },
-                { sigla: "INF236", nombre: "Base de Datos" }
-            ];
-
-            const filtrados = ejemplos.filter(r =>
-                r.sigla.toLowerCase().includes(texto)
-            );
-
-            filtrados.forEach(r => {
-                const div = document.createElement("div");
-                div.className = "result-item";
-                div.textContent = `${r.sigla} - ${r.nombre}`;
-                contenedor.appendChild(div);
-            });
-        });
-
-    </script>
+</script>
 
 </body>
 </html>
