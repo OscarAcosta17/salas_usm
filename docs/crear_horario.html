@@ -161,7 +161,6 @@
     </div>
 </div>
 
-
 <script>
     // ============================================
     // GENERAR TABLA DE BLOQUES
@@ -184,23 +183,38 @@
     });
 
     // ============================================
-    // CARGAR JSON CON HORARIOS
+    // VARIABLES GLOBALES
     // ============================================
 
-    let datos = [];
+    let datos = []; // JSON completo
+    let ramosUnicos = []; // lista única por sigla + paralelo
+    let ramosEnHorario = new Set(); // evitar duplicados
+
+    // ============================================
+    // CARGAR JSON REAL
+    // ============================================
 
     fetch("/salas_usm/data/salas.json")
         .then(r => r.json())
         .then(json => {
-            datos = json; // tu JSON es un arreglo simple
+            datos = json;
+
+            // construir lista única: sigla + paralelo
+            const mapa = new Map();
+
+            json.forEach(r => {
+                const clave = r.SIGLA + "-" + r.PARALELO;
+                if (!mapa.has(clave)) mapa.set(clave, r);
+            });
+
+            ramosUnicos = Array.from(mapa.values());
         });
 
     // ============================================
-    // MAPEAR HORA → BLOQUE ESTIMADO
+    // MAPEAR HORA → BLOQUE
     // ============================================
 
     function horaABloque(hora) {
-        // Ejemplo: "11:05-12:15"
         const inicio = hora.split("-")[0];
         const h = parseInt(inicio.split(":")[0], 10);
 
@@ -215,7 +229,7 @@
     }
 
     // ============================================
-    // BUSCAR RAMOS POR SIGLA
+    // BUSQUEDA DE RAMOS
     // ============================================
 
     const input = document.getElementById("buscar");
@@ -233,9 +247,11 @@
 
         if (q.length < 2) return;
 
-        const encontrados = datos.filter(r => r.SIGLA.toLowerCase().includes(q));
+        const filtrados = ramosUnicos.filter(r =>
+            r.SIGLA.toLowerCase().includes(q)
+        );
 
-        encontrados.forEach(r => {
+        filtrados.forEach(r => {
             const div = document.createElement("div");
             div.className = "result-item";
             div.innerHTML = `
@@ -251,7 +267,7 @@
     });
 
     // ============================================
-    // AÑADIR RAMO AL HORARIO
+    // AÑADIR AL HORARIO (EVITA DUPLICADOS)
     // ============================================
 
     document.addEventListener("click", e => {
@@ -259,8 +275,16 @@
 
         const sigla = e.target.dataset.sigla;
         const paralelo = e.target.dataset.paralelo;
+        const clave = sigla + "-" + paralelo;
 
-        // Obtener todos los horarios del ramo
+        // evitar duplicados
+        if (ramosEnHorario.has(clave)) {
+            alert("Este ramo ya fue añadido al horario.");
+            return;
+        }
+
+        ramosEnHorario.add(clave);
+
         const cursos = datos.filter(r => r.SIGLA === sigla && r.PARALELO === paralelo);
 
         cursos.forEach(r => {
@@ -274,10 +298,15 @@
                 celda.appendChild(tag);
             }
         });
-
     });
 
-</script>
+    // ============================================
+    // LIMPIAR HORARIO
+    // ============================================
 
-</body>
-</html>
+    document.getElementById("btn-limpiar-horario").onclick = () => {
+        document.querySelectorAll(".cell").forEach(c => c.innerHTML = "");
+        ramosEnHorario.clear();
+    };
+
+</script>
