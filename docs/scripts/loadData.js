@@ -1,5 +1,5 @@
 async function cargar() {
-    const res = await fetch("/salas_usm/data/horarios.json")
+    const res = await fetch("/salas_usm/data/salas.json")
 ;
     const json = await res.json();
 

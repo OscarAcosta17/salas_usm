@@ -126,6 +126,6 @@ if __name__ == "__main__":
     
     # Rutas según tu estructura
     ruta_pdf = os.path.join(base_dir, '..', 'pdf', 'horario.pdf')
-    ruta_json = os.path.join(base_dir, '..', 'docs', 'data', 'horarios.json')
+    ruta_json = os.path.join(base_dir, '..', 'docs', 'data', 'salas.json')
 
     extraer_horarios(ruta_pdf, ruta_json)
