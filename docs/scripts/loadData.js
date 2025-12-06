@@ -77,6 +77,7 @@ async function cargar() {
                     <td>${h.NOMBRE}</td>
                     <td>${h.DEPTO}</td>
                     <td>${h.PARALELO}</td>
+                    <td>${h.PROFESOR}</td>
                     <td>${h.DIA}</td>
                     <td>${h.HORA}</td>
                     <td>${h.SALA}</td>
