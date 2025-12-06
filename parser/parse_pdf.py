@@ -1,121 +1,131 @@
 import pdfplumber
 import json
+import os
 import re
-from pathlib import Path
-from datetime import datetime
 
-BASE_DIR = Path(__file__).resolve().parents[1]
-PDF_FILE = BASE_DIR / "pdf" / "horario.pdf"
-OUTPUT_JSON = BASE_DIR / "data" / "salas.json"
+# Mapeo para expandir las abreviaciones del PDF
+TIPO_ASIGNATURA = {
+    "Cát": "Cátedra",
+    "Ayud": "Ayudantía",
+    "Lab": "Laboratorio",
+    "Tal": "Taller",
+    "Prá": "Práctica",
+    "Ter": "Terreno"
+}
 
+def limpiar_texto(texto):
+    """Elimina espacios extra y saltos de línea."""
+    if texto:
+        return " ".join(texto.split())
+    return ""
 
-def parse_pdf():
-    if not PDF_FILE.exists():
-        raise FileNotFoundError(f"No existe el archivo PDF: {PDF_FILE}")
+def formatear_hora(texto_hora):
+    """Convierte '11:05\n12:15' a '11:05-12:15'."""
+    if not texto_hora:
+        return ""
+    texto_limpio = texto_hora.replace('\n', '-').replace(' ', '')
+    if '-' not in texto_limpio and len(texto_limpio) > 5:
+        mid = len(texto_limpio) // 2
+        return f"{texto_limpio[:mid]}-{texto_limpio[mid:]}"
+    return texto_limpio
 
-    resultados = []
+def extraer_horarios(pdf_path, json_output_path):
+    print(f"Leyendo archivo: {pdf_path}")
+    
+    if not os.path.exists(pdf_path):
+        print(f"ERROR: No existe el archivo {pdf_path}")
+        return
 
-    # ⚠️ Mantener contexto entre páginas
-    sigla_actual = None
-    nombre_curso_actual = None
+    datos_finales = []
 
-    with pdfplumber.open(PDF_FILE) as pdf:
-        for page in pdf.pages:
-            tablas = page.extract_tables()
-            if not tablas:
+    # Variables para mantener el estado de la asignatura actual (relleno hacia abajo)
+    current_info = {
+        "SIGLA": "",
+        "NOMBRE": "",
+        "DEPTO": "",
+        "PARALELO": "",
+        "PROFESOR": ""
+    }
+
+    with pdfplumber.open(pdf_path) as pdf:
+        for i, page in enumerate(pdf.pages):
+            print(f"Procesando página {i + 1}...")
+            
+            table = page.extract_table()
+            if not table:
                 continue
 
-            tabla = tablas[0]
+            for row in table:
+                # Limpieza básica de la primera celda para detectar si es cabecera o dato
+                col_0 = limpiar_texto(row[0])
 
-            for fila in tabla:
-                if not fila:
+                # 1. Detectar cabeceras principales y saltarlas
+                if "Sigla" in col_0 or "Asignatura" in col_0:
                     continue
+                
+                # 2. Actualizar datos de la asignatura si la fila tiene Sigla
+                if col_0:
+                    current_info["SIGLA"] = col_0
+                    current_info["NOMBRE"] = limpiar_texto(row[1])
+                    current_info["DEPTO"] = limpiar_texto(row[2])
+                    current_info["PARALELO"] = limpiar_texto(row[3])
+                    current_info["PROFESOR"] = limpiar_texto(row[4])
+                
+                # 3. Extraer datos del horario
+                try:
+                    dia_raw = limpiar_texto(row[6])
+                    
+                    # --- CORRECCIÓN AQUÍ ---
+                    # Filtro robusto para eliminar filas de encabezados o basura
+                    if (not dia_raw or 
+                        "Día" in dia_raw or 
+                        "Dia" in dia_raw or 
+                        "Bloque" in dia_raw):
+                        continue
 
-                # 1) Fila cabecera global de la tabla
-                if fila[0] and "Sigla" in fila[0]:
-                    continue
+                    hora_raw = row[8]
+                    tipo_raw = limpiar_texto(row[9])
+                    sala_raw = limpiar_texto(row[10])
 
-                # 2) Fila de encabezado de ramo (tabla principal)
-                # SIGA siempre imprime: sigla | nombre | departamento | paralelo | profesor | cupos ...
-                if (
-                    len(fila) >= 5                          # debe tener columnas suficientes
-                    and fila[0] not in ["", "Día", None]    # primera columna no es horario
-                    and fila[1] not in ["", "Bloque", None] # segunda columna tampoco
-                ):
-                    sigla_actual = fila[0].strip()
-                    nombre_curso_actual = fila[1].strip()
+                    # Si no hay hora, generalmente es una fila inválida que se coló
+                    if not hora_raw:
+                        continue
 
-                    # (opcional, para futura ampliación)
-                    departamento_actual = fila[2].strip()
-                    paralelo_actual = fila[3].strip()
-                    profesor_actual = fila[4].strip()
+                    # Formateos
+                    hora_fmt = formatear_hora(hora_raw)
+                    tipo_fmt = TIPO_ASIGNATURA.get(tipo_raw.split('.')[0], tipo_raw)
 
-                    # Guardamos para usarlos en horarios
-                    contexto = {
-                        "sigla": sigla_actual,
-                        "nombre": nombre_curso_actual,
-                        "departamento": departamento_actual,
-                        "paralelo": paralelo_actual,
-                        "profesor_ramo": profesor_actual,
+                    clase = {
+                        "SIGLA": current_info["SIGLA"],
+                        "NOMBRE": current_info["NOMBRE"],
+                        "DEPTO": current_info["DEPTO"],
+                        "PARALELO": current_info["PARALELO"],
+                        "PROFESOR": current_info["PROFESOR"],
+                        "DIA": dia_raw,
+                        "HORA": hora_fmt,
+                        "SALA": sala_raw,
+                        "ASIG": tipo_fmt
                     }
 
+                    # Guardamos solo si hay datos esenciales
+                    datos_finales.append(clase)
+
+                except IndexError:
                     continue
 
-
-                # 3) Filas de horario (día / bloque / hora / sala / sede / tipo)
-                if len(fila) > 7 and fila[6] in ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"]:
-                    dia = fila[6]
-
-                    bloques = fila[7].split("\n") if fila[7] else [""]
-                    horas = fila[8].split("\n") if len(fila) > 8 and fila[8] else [""]
-                    tipo = fila[9] if len(fila) > 9 else ""
-                    salas = fila[10].split("\n") if len(fila) > 10 and fila[10] else [""]
-                    sedes = fila[11].split("\n") if len(fila) > 11 and fila[11] else [""]
-
-                    max_len = max(len(bloques), len(horas), len(salas), len(sedes))
-
-                    def pad(lst):
-                        return lst + [""] * (max_len - len(lst))
-
-                    bloques = pad(bloques)
-                    horas = pad(horas)
-                    salas = pad(salas)
-                    sedes = pad(sedes)
-
-                    for b, h, s, se in zip(bloques, horas, salas, sedes):
-                        if not b.strip():
-                            continue
-
-                        resultados.append({
-                            "sigla": sigla_actual,             # ← usa la última sigla válida
-                            "curso": nombre_curso_actual or "",# ← usa último nombre válido
-                            "dia": dia,
-                            "bloque": b.strip(),
-                            "hora": h.strip(),
-                            "sala": s.replace("-", "- ").strip(),
-                            "sede": se.strip(),
-                            "tipo": (
-                                "Cátedra" if "Cát" in (tipo or "")
-                                else "Laboratorio" if "Lab" in (tipo or "")
-                                else (tipo or "")
-                            )
-                        })
-
-    OUTPUT_JSON.parent.mkdir(exist_ok=True)
-    OUTPUT_JSON.write_text(
-        json.dumps(
-            {
-                "updated": datetime.now().isoformat(timespec="seconds"),
-                "horarios": resultados
-            },
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-
-    print(f"[OK] Archivo generado: {OUTPUT_JSON}")
-
+    # Guardar
+    os.makedirs(os.path.dirname(json_output_path), exist_ok=True)
+    
+    with open(json_output_path, 'w', encoding='utf-8') as f:
+        json.dump(datos_finales, f, indent=4, ensure_ascii=False)
+    
+    print(f"Finalizado. {len(datos_finales)} registros guardados en {json_output_path}")
 
 if __name__ == "__main__":
-    parse_pdf()
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Rutas según tu estructura
+    ruta_pdf = os.path.join(base_dir, '..', 'pdf', 'horario.pdf')
+    ruta_json = os.path.join(base_dir, '..', 'docs', 'data', 'horarios.json')
+
+    extraer_horarios(ruta_pdf, ruta_json)
