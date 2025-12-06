@@ -35,6 +35,8 @@ async function cargar() {
                 tr.innerHTML = `
                     <td>${h.SIGLA}</td>
                     <td>${h.NOMBRE}</td>
+                    <td>${h.DEPTO}</td>
+                    <td>${h.PARALELO}</td>
                     <td>${h.DIA}</td>
                     <td>${h.HORA}</td>
                     <td>${h.SALA}</td>
