@@ -2,39 +2,38 @@ async function cargar() {
     const res = await fetch("../data/salas.json");
     const json = await res.json();
 
+    const horarios = json.horarios || [];
+
     document.getElementById("updated").innerText =
         "Última actualización: " + json.updated;
 
-    const data = json.asignaturas;
-
-    // ================================
-    // LLENAR TABLA DE HORARIOS
-    // ================================
     const tbody = document.querySelector("#tabla-horarios tbody");
+
     function renderTabla() {
         const diaFiltro = document.getElementById("filtro-dia").value;
         const salaFiltro = document.getElementById("filtro-sala").value.toLowerCase();
 
         tbody.innerHTML = "";
 
-        data.filter(item => {
-            return (
-                (diaFiltro === "" || item.dia === diaFiltro) &&
-                (salaFiltro === "" || item.sala.toLowerCase().includes(salaFiltro))
-            );
-        }).forEach(item => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${item.bloque}</td>
-                <td>${item.hora}</td>
-                <td>${item.sala}</td>
-                <td>${item.asignatura}</td>
-                <td>${item.departamento}</td>
-                <td>${item.dia}</td>
-                <td>${item.tipo}</td>
-            `;
-            tbody.appendChild(tr);
-        });
+        horarios
+            .filter(h => (
+                (diaFiltro === "" || h.dia === diaFiltro) &&
+                (salaFiltro === "" || h.sala.toLowerCase().includes(salaFiltro))
+            ))
+            .forEach(h => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${h.sigla}</td>
+                    <td>${h.curso}</td>
+                    <td>${h.dia}</td>
+                    <td>${h.bloque}</td>
+                    <td>${h.hora}</td>
+                    <td>${h.sala}</td>
+                    <td>${h.sede}</td>
+                    <td>${h.tipo}</td>
+                `;
+                tbody.appendChild(tr);
+            });
     }
 
     renderTabla();
@@ -42,9 +41,10 @@ async function cargar() {
     document.getElementById("filtro-dia").onchange = renderTabla;
     document.getElementById("filtro-sala").oninput = renderTabla;
 
-    // ================================
-    // CALCULAR SALAS LIBRES
-    // ================================
+    // ====================================
+    // SALAS LIBRES
+    // ====================================
+
     const lista = document.getElementById("lista-salas-libres");
 
     function calcularSalasLibres() {
@@ -58,11 +58,11 @@ async function cargar() {
             return;
         }
 
-        const salasOcupadas = data
-            .filter(x => x.dia === dia && x.bloque === bloque)
-            .map(x => x.sala);
+        const salasOcupadas = horarios
+            .filter(h => h.dia === dia && h.bloque === bloque)
+            .map(h => h.sala);
 
-        const todasSalas = [...new Set(data.map(x => x.sala))];
+        const todasSalas = [...new Set(horarios.map(h => h.sala))];
 
         const libres = todasSalas.filter(s => !salasOcupadas.includes(s));
 
