@@ -35,30 +35,32 @@ def parse_pdf():
                 if fila[0] and "Sigla" in fila[0]:
                     continue
 
-                # 2) Fila de "curso": incluye sigla, nombre, depto, profe, etc.
-                if fila[0] and not fila[0].startswith("Día Bloque"):
-                    header = fila[0]
-                    lineas = header.splitlines()
-                    tokens = [t for linea in lineas for t in linea.split()]
+                # 2) Fila de encabezado de ramo (tabla principal)
+                # SIGA siempre imprime: sigla | nombre | departamento | paralelo | profesor | cupos ...
+                if (
+                    len(fila) >= 5                          # debe tener columnas suficientes
+                    and fila[0] not in ["", "Día", None]    # primera columna no es horario
+                    and fila[1] not in ["", "Bloque", None] # segunda columna tampoco
+                ):
+                    sigla_actual = fila[0].strip()
+                    nombre_curso_actual = fila[1].strip()
 
-                    # Buscar sigla tipo ABC123 o ABC123-A
-                    sigla = None
-                    for t in tokens:
-                        if re.match(r"^[A-Z]{3}\d{3}(-[A-Z])?$", t):
-                            sigla = t
-                            break
+                    # (opcional, para futura ampliación)
+                    departamento_actual = fila[2].strip()
+                    paralelo_actual = fila[3].strip()
+                    profesor_actual = fila[4].strip()
 
-                    sigla_actual = sigla or sigla_actual  # si no encuentra, mantiene la anterior
-
-                    # Nombre del curso (muy aproximado)
-                    if sigla and sigla in tokens:
-                        idx = tokens.index(sigla)
-                        nombre_curso_actual = " ".join(tokens[:idx])
-                    elif lineas:
-                        nombre_curso_actual = lineas[0]
-                    # si tampoco hay, mantiene nombre_curso_actual anterior
+                    # Guardamos para usarlos en horarios
+                    contexto = {
+                        "sigla": sigla_actual,
+                        "nombre": nombre_curso_actual,
+                        "departamento": departamento_actual,
+                        "paralelo": paralelo_actual,
+                        "profesor_ramo": profesor_actual,
+                    }
 
                     continue
+
 
                 # 3) Filas de horario (día / bloque / hora / sala / sede / tipo)
                 if len(fila) > 7 and fila[6] in ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"]:
