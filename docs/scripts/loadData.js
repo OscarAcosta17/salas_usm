@@ -86,6 +86,14 @@ async function cargar() {
             });
     }
 
+    document.getElementById("btn-limpiar").onclick = () => {
+        document.getElementById("filtro-dia").value = "";
+        document.getElementById("filtro-sala").value = "";
+        document.getElementById("filtro-profe").value = "";
+        document.getElementById("filtro-depto").value = "";
+        renderTabla();
+    };
+
 
     document.getElementById("filtro-dia-libre").onchange = calcularSalasLibres;
     document.getElementById("filtro-bloque-libre").oninput = calcularSalasLibres;
