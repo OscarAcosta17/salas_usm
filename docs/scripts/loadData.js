@@ -1,39 +1,46 @@
 async function cargar() {
-    const res = await fetch("/salas_usm/data/salas.json")
-;
+    const res = await fetch("/salas_usm/data/salas.json");
     const json = await res.json();
 
-    console.log(json);
+    console.log("JSON cargado:", json);
 
-    const horarios = json.horarios || [];
+    // Tu JSON es un arreglo, no un objeto con "horarios"
+    const horarios = Array.isArray(json) ? json : json.horarios;
 
-    document.getElementById("updated").innerText =
-        "Última actualización: " + json.updated;
+    // Si tu JSON tenía updated, lo mostramos
+    if (!Array.isArray(json) && json.updated) {
+        document.getElementById("updated").innerText =
+            "Última actualización: " + json.updated;
+    } else {
+        document.getElementById("updated").innerText = "";
+    }
 
     const tbody = document.querySelector("#tabla-horarios tbody");
 
     function renderTabla() {
         const diaFiltro = document.getElementById("filtro-dia").value;
-        const salaFiltro = document.getElementById("filtro-sala").value.toLowerCase();
+        const salaFiltro = document
+            .getElementById("filtro-sala")
+            .value.toLowerCase();
 
         tbody.innerHTML = "";
 
         horarios
-            .filter(h => (
-                (diaFiltro === "" || h.dia === diaFiltro) &&
-                (salaFiltro === "" || h.sala.toLowerCase().includes(salaFiltro))
-            ))
+            .filter(h =>
+                (diaFiltro === "" || h.DIA === diaFiltro) &&
+                (salaFiltro === "" || h.SALA.toLowerCase().includes(salaFiltro))
+            )
             .forEach(h => {
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
-                    <td>${h.sigla}</td>
-                    <td>${h.curso}</td>
-                    <td>${h.dia}</td>
-                    <td>${h.bloque}</td>
-                    <td>${h.hora}</td>
-                    <td>${h.sala}</td>
-                    <td>${h.sede}</td>
-                    <td>${h.tipo}</td>
+                    <td>${h.SIGLA}</td>
+                    <td>${h.NOMBRE}</td>
+                    <td>${h.DIA}</td>
+                    <td>${""}</td> <!-- no tienes BLOQUE -->
+                    <td>${h.HORA}</td>
+                    <td>${h.SALA}</td>
+                    <td>${"SJ"}</td> <!-- tu JSON no tiene SEDE -->
+                    <td>${h.ASIG}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -44,9 +51,9 @@ async function cargar() {
     document.getElementById("filtro-dia").onchange = renderTabla;
     document.getElementById("filtro-sala").oninput = renderTabla;
 
-    // ====================================
+    // ===========================
     // SALAS LIBRES
-    // ====================================
+    // ===========================
 
     const lista = document.getElementById("lista-salas-libres");
 
@@ -62,10 +69,10 @@ async function cargar() {
         }
 
         const salasOcupadas = horarios
-            .filter(h => h.dia === dia && h.bloque === bloque)
-            .map(h => h.sala);
+            .filter(h => h.DIA === dia /* y si tuvieras bloque también aquí */)
+            .map(h => h.SALA);
 
-        const todasSalas = [...new Set(horarios.map(h => h.sala))];
+        const todasSalas = [...new Set(horarios.map(h => h.SALA))];
 
         const libres = todasSalas.filter(s => !salasOcupadas.includes(s));
 
