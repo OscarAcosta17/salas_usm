@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Salas Libres USM</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    td, th { border: 1px solid #ccc; padding: 8px; }
+  </style>
+</head>
+<body>
+
+<h1>Salas Libres USM</h1>
+<p>Información de disponibilidad actualizada manualmente.</p>
+
+<div id="salas"></div>
+
+<script>
+async function cargarSalas() {
+  const response = await fetch("salas.json");
+  const salas = await response.json();
+
+  let html = "<table><tr><th>Sala</th><th>Campus</th><th>Horario Libre</th></tr>";
+  salas.forEach(s => {
+    html += `<tr>
+      <td>${s.sala}</td>
+      <td>${s.campus}</td>
+      <td>${s.horario}</td>
+    </tr>`;
+  });
+  html += "</table>";
+
+  document.getElementById("salas").innerHTML = html;
+}
+
+cargarSalas();
+</script>
+
+</body>
+</html>
