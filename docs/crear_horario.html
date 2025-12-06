@@ -24,14 +24,16 @@
             text-decoration: none;
         }
 
+        /* Contenedor principal */
         .container {
             display: flex;
             height: calc(100vh - 60px);
         }
 
-        /* Panel izquierdo */
+        /* Panel izquierdo - búsqueda */
         .left-panel {
-            width: 35%;
+            width: 28%;
+            min-width: 280px;
             border-right: 2px solid #ddd;
             padding: 20px;
             background: white;
@@ -46,17 +48,18 @@
 
         .search-area input {
             flex: 1;
-            padding: 10px;
-            font-size: 16px;
+            padding: 8px;
+            font-size: 15px;
         }
 
-        .clear-btn {
-            padding: 10px;
-            cursor: pointer;
+        .clear-input-btn {
+            padding: 8px 11px;
             background: #e74c3c;
-            color: white;
             border: none;
-            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
         }
 
         .result-item {
@@ -64,6 +67,7 @@
             padding: 12px;
             margin-top: 10px;
             border-radius: 5px;
+            font-size: 14px;
         }
 
         .add-btn {
@@ -76,11 +80,25 @@
             border-radius: 4px;
         }
 
-        /* Panel derecho */
+        /* Panel derecho - horario */
         .right-panel {
-            width: 65%;
+            width: 72%;
             padding: 20px;
             overflow-y: auto;
+        }
+
+        #btn-limpiar-horario {
+            margin-bottom: 12px;
+            padding: 8px 14px;
+            background: #c0392b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #btn-limpiar-horario:hover {
+            background: #a93226;
         }
 
         table {
@@ -102,22 +120,23 @@
         }
 
         .cell {
-            height: 40px;
+            height: 45px;
         }
 
         .ramo {
             background: #f9e79f;
+            padding: 3px 5px;
             border-radius: 4px;
-            padding: 2px;
             display: block;
-            font-size: 14px;
-            margin: 2px 0;
+            margin: 2px;
+            font-size: 13px;
         }
     </style>
 </head>
 
 <body>
 
+<!-- Barra superior -->
 <div class="topbar">
     <a href="index.html">Salas USM</a>
 </div>
@@ -130,18 +149,19 @@
         <h2>Buscar ramo por sigla</h2>
 
         <div class="search-area">
-            <input type="text" id="buscar" placeholder="Ej: ELI328, MAT201...">
-            <button class="clear-btn" id="limpiar">X</button>
+            <input type="text" id="buscar" placeholder="Ej: MAT201, ELI328">
+            <button class="clear-input-btn" id="limpiar">X</button>
         </div>
 
         <div id="resultados"></div>
-
     </div>
 
     <!-- Panel derecho -->
     <div class="right-panel">
 
         <h2>Horario Semanal</h2>
+
+        <button id="btn-limpiar-horario">Limpiar horario</button>
 
         <table>
             <thead>
@@ -154,18 +174,17 @@
                     <th>Viernes</th>
                 </tr>
             </thead>
-            <tbody id="tabla">
-            </tbody>
+            <tbody id="tabla"></tbody>
         </table>
 
     </div>
+
 </div>
 
 <script>
     // ============================================
     // GENERAR TABLA DE BLOQUES
     // ============================================
-
     const bloques = ["1-2","3-4","5-6","7-8","9-10","11-12","13-14","15-16"];
     const tbody = document.getElementById("tabla");
 
@@ -185,35 +204,29 @@
     // ============================================
     // VARIABLES GLOBALES
     // ============================================
-
-    let datos = []; // JSON completo
-    let ramosUnicos = []; // lista única por sigla + paralelo
-    let ramosEnHorario = new Set(); // evitar duplicados
+    let datos = [];
+    let ramosUnicos = [];
+    let ramosEnHorario = new Set();
 
     // ============================================
-    // CARGAR JSON REAL
+    // CARGAR JSON
     // ============================================
-
     fetch("/salas_usm/data/salas.json")
         .then(r => r.json())
         .then(json => {
             datos = json;
 
-            // construir lista única: sigla + paralelo
             const mapa = new Map();
-
             json.forEach(r => {
                 const clave = r.SIGLA + "-" + r.PARALELO;
                 if (!mapa.has(clave)) mapa.set(clave, r);
             });
-
             ramosUnicos = Array.from(mapa.values());
         });
 
     // ============================================
     // MAPEAR HORA → BLOQUE
     // ============================================
-
     function horaABloque(hora) {
         const inicio = hora.split("-")[0];
         const h = parseInt(inicio.split(":")[0], 10);
@@ -231,7 +244,6 @@
     // ============================================
     // BUSQUEDA DE RAMOS
     // ============================================
-
     const input = document.getElementById("buscar");
     const limpiarBtn = document.getElementById("limpiar");
     const resultadosDiv = document.getElementById("resultados");
@@ -267,9 +279,8 @@
     });
 
     // ============================================
-    // AÑADIR AL HORARIO (EVITA DUPLICADOS)
+    // AÑADIR AL HORARIO (con control de duplicados)
     // ============================================
-
     document.addEventListener("click", e => {
         if (!e.target.classList.contains("add-btn")) return;
 
@@ -277,7 +288,6 @@
         const paralelo = e.target.dataset.paralelo;
         const clave = sigla + "-" + paralelo;
 
-        // evitar duplicados
         if (ramosEnHorario.has(clave)) {
             alert("Este ramo ya fue añadido al horario.");
             return;
@@ -289,7 +299,9 @@
 
         cursos.forEach(r => {
             const bloque = horaABloque(r.HORA);
-            const celda = document.querySelector(`td[data-dia="${r.DIA}"][data-bloque="${bloque}"]`);
+            const celda = document.querySelector(
+                `td[data-dia="${r.DIA}"][data-bloque="${bloque}"]`
+            );
 
             if (celda) {
                 const tag = document.createElement("span");
@@ -301,12 +313,13 @@
     });
 
     // ============================================
-    // LIMPIAR HORARIO
+    // LIMPIAR HORARIO COMPLETO
     // ============================================
-
     document.getElementById("btn-limpiar-horario").onclick = () => {
         document.querySelectorAll(".cell").forEach(c => c.innerHTML = "");
         ramosEnHorario.clear();
     };
-
 </script>
+
+</body>
+</html>
