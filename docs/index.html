@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Salas USM</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<h1>Salas USM</h1>
+
+<p id="updated"></p>
+
+<hr>
+
+<!-- =======================
+          SECCIÓN HORARIOS
+======================== -->
+<h2>Horarios</h2>
+
+<div class="filtros">
+    <label>Filtrar por día:</label>
+    <select id="filtro-dia">
+        <option value="">Todos</option>
+        <option value="Lunes">Lunes</option>
+        <option value="Martes">Martes</option>
+        <option value="Miércoles">Miércoles</option>
+        <option value="Jueves">Jueves</option>
+        <option value="Viernes">Viernes</option>
+    </select>
+
+    <label>Filtrar por sala:</label>
+    <input type="text" id="filtro-sala" placeholder="Ej: A014">
+</div>
+
+<table id="tabla-horarios">
+    <thead>
+        <tr>
+            <th>Bloque</th>
+            <th>Hora</th>
+            <th>Sala</th>
+            <th>Asignatura</th>
+            <th>Departamento</th>
+            <th>Día</th>
+            <th>Tipo</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+
+<hr>
+
+<!-- =======================
+       SECCIÓN SALAS LIBRES
+======================== -->
+<h2>Salas libres</h2>
+
+<div class="filtros">
+    <label>Día:</label>
+    <select id="filtro-dia-libre">
+        <option value="">Elegir día</option>
+        <option value="Lunes">Lunes</option>
+        <option value="Martes">Martes</option>
+        <option value="Miércoles">Miércoles</option>
+        <option value="Jueves">Jueves</option>
+        <option value="Viernes">Viernes</option>
+    </select>
+
+    <label>Bloque:</label>
+    <input type="number" id="filtro-bloque-libre" min="1" max="10" placeholder="Bloque (1–10)">
+</div>
+
+<ul id="lista-salas-libres"></ul>
+
+
+<script src="scripts/loadData.js"></script>
+</body>
+</html>
