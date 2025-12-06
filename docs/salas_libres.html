@@ -3,17 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="icono.png">
-
     <title>Salas Libres - USM</title>
 
     <style>
-        /* --- ESTILOS GENERALES (Consistentes) --- */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        /* --- ESTILOS GENERALES --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -39,7 +33,7 @@
             border-radius: 15px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             width: 100%;
-            max-width: 600px;
+            max-width: 650px; /* Un poco más ancho para que quepa el horario */
             text-align: center;
         }
 
@@ -52,11 +46,7 @@
             padding-bottom: 20px;
         }
 
-        h1 {
-            font-size: 28px;
-            color: #e0e0e0;
-            font-weight: 600;
-        }
+        h1 { font-size: 28px; color: #e0e0e0; font-weight: 600; }
 
         .btn-nav {
             padding: 8px 16px;
@@ -68,10 +58,7 @@
             border: 1px solid #5a5a5a;
             transition: 0.3s;
         }
-
-        .btn-nav:hover {
-            background-color: #616161;
-        }
+        .btn-nav:hover { background-color: #616161; }
 
         .filtros {
             display: flex;
@@ -89,14 +76,9 @@
             min-width: 150px;
         }
 
-        label {
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #aaa;
-        }
+        label { margin-bottom: 8px; font-size: 14px; color: #aaa; }
 
-        select,
-        input {
+        select, input {
             padding: 12px;
             background-color: #383838;
             border: 1px solid #555;
@@ -106,12 +88,9 @@
             outline: none;
             width: 100%;
         }
+        select:focus, input:focus { border-color: #3498db; }
 
-        select:focus,
-        input:focus {
-            border-color: #3498db;
-        }
-
+        /* --- ESTILOS DE LA LISTA MEJORADOS --- */
         ul {
             list-style: none;
             padding: 0;
@@ -123,12 +102,15 @@
         li {
             background-color: #3a3a3a;
             margin-bottom: 10px;
-            padding: 15px;
+            padding: 15px 20px;
             border-radius: 8px;
-            font-size: 18px;
-            border-left: 5px solid #3498db;
-            text-align: left;
+            border-left: 5px solid #27ae60; /* Verde para indicar "Libre" */
             transition: transform 0.2s;
+            
+            /* Flexbox para separar nombre y horario */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         li:hover {
@@ -136,26 +118,32 @@
             transform: translateX(5px);
         }
 
-        li:first-child:only-child {
+        /* Estilos internos del item */
+        .sala-nombre {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .sala-horario {
+            font-size: 14px;
+            color: #bbb;
+            text-align: right;
+        }
+
+        .empty-msg {
+            display: block;
             text-align: center;
-            border-left: none;
+            border: none;
             background: transparent;
             color: #888;
             font-style: italic;
         }
 
-        ul::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ul::-webkit-scrollbar-track {
-            background: #2c2c2c;
-        }
-
-        ul::-webkit-scrollbar-thumb {
-            background: #555;
-            border-radius: 4px;
-        }
+        /* Scrollbar */
+        ul::-webkit-scrollbar { width: 8px; }
+        ul::-webkit-scrollbar-track { background: #2c2c2c; }
+        ul::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
 
         footer {
             text-align: center;
@@ -197,7 +185,7 @@
             </div>
 
             <ul id="lista-salas-libres">
-                <li>Seleccione un día y un bloque para ver resultados.</li>
+                <li class="empty-msg">Seleccione día y bloque para buscar.</li>
             </ul>
 
         </div>
@@ -207,95 +195,135 @@
         &copy; 2025 Salas USM. Todos los derechos reservados.
     </footer>
 
-
-<!-- ========================================================= -->
-<!--            LÓGICA COMPLETA DE SALAS LIBRES                -->
-<!-- ========================================================= -->
-
 <script>
-let datos = [];
+    // ============================================
+    // 1. DEFINICIÓN DE HORARIOS USM
+    // ============================================
+    // Mapeamos el input (1, 2...) a texto legible y rangos
+    const INFO_BLOQUES = {
+        1:  { texto: "Bloque 1-2 (08:15 - 09:25)", par: 1 },
+        2:  { texto: "Bloque 1-2 (08:15 - 09:25)", par: 1 },
+        3:  { texto: "Bloque 3-4 (09:35 - 10:45)", par: 3 },
+        4:  { texto: "Bloque 3-4 (09:35 - 10:45)", par: 3 },
+        5:  { texto: "Bloque 5-6 (11:05 - 12:15)", par: 5 },
+        6:  { texto: "Bloque 5-6 (11:05 - 12:15)", par: 5 },
+        7:  { texto: "Bloque 7-8 (12:25 - 13:35)", par: 7 },
+        8:  { texto: "Bloque 7-8 (12:25 - 13:35)", par: 7 },
+        9:  { texto: "Bloque 9-10 (14:30 - 15:40)", par: 9 },
+        10: { texto: "Bloque 9-10 (14:30 - 15:40)", par: 9 },
+        11: { texto: "Bloque 11-12 (15:50 - 17:00)", par: 11 },
+        12: { texto: "Bloque 11-12 (15:50 - 17:00)", par: 11 },
+        13: { texto: "Bloque 13-14 (17:10 - 18:20)", par: 13 },
+        14: { texto: "Bloque 13-14 (17:10 - 18:20)", par: 13 },
+        15: { texto: "Bloque 15-16 (18:30 - 19:40)", par: 15 },
+        16: { texto: "Bloque 15-16 (18:30 - 19:40)", par: 15 }
+    };
 
-/* ------------------ 1. Cargar JSON ------------------ */
-async function cargarDatos() {
-    const res = await fetch("data/salas.json");
-    datos = await res.json();
-}
+    let datos = [];
 
-/* ------------------ 2. Convertir hora → bloque ------------------ */
-function horaABloque(hora) {
-    const inicio = hora.split("-")[0];
-    const [h, m] = inicio.split(":").map(n => parseInt(n));
-    const minutos = h * 60 + m;
+    // ============================================
+    // 2. CARGAR DATOS
+    // ============================================
+    fetch("data/salas.json")
+        .then(r => r.json())
+        .then(json => {
+            datos = json;
+        })
+        .catch(err => console.error("Error cargando JSON:", err));
 
-    const rangos = [
-        { bloque: 1, ini: 8*60 + 15, fin: 9*60 + 25 },
-        { bloque: 3, ini: 9*60 + 40, fin: 10*60 + 50 },
-        { bloque: 5, ini: 11*60 + 5, fin: 12*60 + 15 },
-        { bloque: 7, ini: 12*60 + 30, fin: 13*60 + 40 },
-        { bloque: 9, ini: 14*60 + 40, fin: 15*60 + 50 },
-        { bloque: 11, ini: 16*60 + 5, fin: 17*60 + 15 },
-        { bloque: 13, ini: 17*60 + 30, fin: 18*60 + 40 },
-        { bloque: 15, ini: 18*60 + 55, fin: 20*60 + 5 }
-    ];
 
-    for (const r of rangos) {
-        if (minutos >= r.ini && minutos <= r.fin) return r.bloque;
+    // ============================================
+    // 3. AUXILIAR: CONVERTIR HORA JSON A BLOQUE IMPAR
+    // ============================================
+    // Esta función revisa la hora de inicio de la clase en el JSON
+    // y determina a qué "bloque impar" (1, 3, 5...) pertenece.
+    function horaInicioABloqueBase(horaStr) {
+        if (!horaStr) return null;
+        
+        // Parseamos "08:15" -> 8 * 60 + 15 -> 495 minutos
+        const inicio = horaStr.split("-")[0].trim();
+        const [h, m] = inicio.split(":").map(Number);
+        const minutos = h * 60 + m;
+
+        // Definimos rangos aproximados (holgura de +-10 min)
+        if (minutos >= 480 && minutos < 570) return 1;  // ~08:00
+        if (minutos >= 570 && minutos < 660) return 3;  // ~09:30
+        if (minutos >= 660 && minutos < 740) return 5;  // ~11:00
+        if (minutos >= 740 && minutos < 850) return 7;  // ~12:20
+        if (minutos >= 850 && minutos < 940) return 9;  // ~14:30
+        if (minutos >= 940 && minutos < 1020) return 11; // ~15:50
+        if (minutos >= 1020 && minutos < 1100) return 13; // ~17:10
+        if (minutos >= 1100) return 15; // ~18:30
+
+        return null; 
     }
 
-    return null;
-}
+    // ============================================
+    // 4. LÓGICA PRINCIPAL
+    // ============================================
+    function buscarSalasLibres() {
+        const diaInput = document.getElementById("filtro-dia-libre").value;
+        const bloqueInput = parseInt(document.getElementById("filtro-bloque-libre").value);
+        const lista = document.getElementById("lista-salas-libres");
 
-/* ------------------ 3. Buscar salas libres ------------------ */
-function buscarSalasLibres() {
-    const dia = document.getElementById("filtro-dia-libre").value;
-    const bloqueUsuario = parseInt(document.getElementById("filtro-bloque-libre").value);
+        lista.innerHTML = ""; // Limpiar lista
 
-    const lista = document.getElementById("lista-salas-libres");
-    lista.innerHTML = "";
-
-    if (!dia || !bloqueUsuario) {
-        lista.innerHTML = "<li>Seleccione un día y un bloque para ver resultados.</li>";
-        return;
-    }
-
-    // Convertir bloque par → bloque impar
-    const bloqueReal = bloqueUsuario % 2 === 0 ? bloqueUsuario - 1 : bloqueUsuario;
-
-    const salasOcupadas = new Set();
-
-    datos.forEach(r => {
-        if (r.DIA !== dia) return;
-
-        const b = horaABloque(r.HORA);
-
-        if (b === bloqueReal) {
-            salasOcupadas.add(r.SALA);
+        // Validaciones básicas
+        if (!diaInput || isNaN(bloqueInput)) {
+            lista.innerHTML = '<li class="empty-msg">Seleccione día y bloque para buscar.</li>';
+            return;
         }
-    });
 
-    const salasTodas = [...new Set(datos.map(r => r.SALA))];
-    const salasLibres = salasTodas.filter(s => !salasOcupadas.has(s));
+        // Obtener info del bloque seleccionado (Texto y ID par)
+        const infoBloque = INFO_BLOQUES[bloqueInput];
+        
+        if (!infoBloque) {
+            lista.innerHTML = '<li class="empty-msg">Bloque inválido (Use 1-16).</li>';
+            return;
+        }
 
-    if (salasLibres.length === 0) {
-        lista.innerHTML = "<li>No hay salas libres en ese bloque.</li>";
-        return;
+        // 1. Obtener lista de TODAS las salas únicas en el sistema
+        const todasLasSalas = [...new Set(datos.map(d => d.SALA))].sort();
+
+        // 2. Identificar cuáles están ocupadas
+        const salasOcupadas = new Set();
+
+        datos.forEach(ramo => {
+            // Si el ramo es el mismo día
+            if (ramo.DIA === diaInput) {
+                // Verificamos en qué bloque cae ese ramo
+                const bloqueRamo = horaInicioABloqueBase(ramo.HORA);
+                
+                // Si el bloque del ramo coincide con el bloque "base" seleccionado
+                // (Ej: Usuario pide 6, base es 5. Ramo es 5-6, base es 5 -> Coinciden)
+                if (bloqueRamo === infoBloque.par) {
+                    salasOcupadas.add(ramo.SALA);
+                }
+            }
+        });
+
+        // 3. Filtrar libres (Todas - Ocupadas)
+        const salasLibres = todasLasSalas.filter(sala => !salasOcupadas.has(sala));
+
+        // 4. Mostrar resultados
+        if (salasLibres.length === 0) {
+            lista.innerHTML = '<li class="empty-msg">No hay salas libres en este horario.</li>';
+        } else {
+            salasLibres.forEach(sala => {
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    <span class="sala-nombre">${sala}</span>
+                    <span class="sala-horario">Disponible: ${infoBloque.texto}</span>
+                `;
+                lista.appendChild(li);
+            });
+        }
     }
 
-    salasLibres.sort();
+    // Eventos
+    document.getElementById("filtro-dia-libre").addEventListener("change", buscarSalasLibres);
+    document.getElementById("filtro-bloque-libre").addEventListener("input", buscarSalasLibres);
 
-    salasLibres.forEach(s => {
-        const li = document.createElement("li");
-        li.textContent = s;
-        lista.appendChild(li);
-    });
-}
-
-/* ------------------ 4. Activar eventos ------------------ */
-document.getElementById("filtro-dia-libre").addEventListener("change", buscarSalasLibres);
-document.getElementById("filtro-bloque-libre").addEventListener("input", buscarSalasLibres);
-
-/* ------------------ 5. Cargar datos al inicio ------------------ */
-cargarDatos();
 </script>
 
 </body>
