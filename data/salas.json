@@ -1,0 +1,7 @@
+{
+  "updated": "2025-12-06T11:30:00",
+  "salas": [
+    { "sala": "D201", "campus": "Casa Central", "dia": "Lunes", "bloque": "08:00-09:20", "estado": "Libre" },
+    { "sala": "G203", "campus": "San Joaquín", "dia": "Lunes", "bloque": "10:00-11:20", "estado": "Libre" }
+  ]
+}
