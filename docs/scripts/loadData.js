@@ -36,10 +36,8 @@ async function cargar() {
                     <td>${h.SIGLA}</td>
                     <td>${h.NOMBRE}</td>
                     <td>${h.DIA}</td>
-                    <td>${""}</td> <!-- no tienes BLOQUE -->
                     <td>${h.HORA}</td>
                     <td>${h.SALA}</td>
-                    <td>${"SJ"}</td> <!-- tu JSON no tiene SEDE -->
                     <td>${h.ASIG}</td>
                 `;
                 tbody.appendChild(tr);
