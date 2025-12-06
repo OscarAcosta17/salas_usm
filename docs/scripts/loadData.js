@@ -50,43 +50,42 @@ async function cargar() {
 
     document.getElementById("filtro-dia").onchange = renderTabla;
     document.getElementById("filtro-sala").oninput = renderTabla;
-
-    // ===========================
-    // SALAS LIBRES
-    // ===========================
+    document.getElementById("filtro-profe").oninput = renderTabla;
+    document.getElementById("filtro-depto").oninput = renderTabla;
 
     const lista = document.getElementById("lista-salas-libres");
 
-    function calcularSalasLibres() {
-        lista.innerHTML = "";
+    function renderTabla() {
+        const diaFiltro = document.getElementById("filtro-dia").value;
+        const salaFiltro = document.getElementById("filtro-sala").value.toLowerCase();
+        const profeFiltro = document.getElementById("filtro-profe").value.toLowerCase();
+        const deptoFiltro = document.getElementById("filtro-depto").value.toLowerCase();
 
-        const dia = document.getElementById("filtro-dia-libre").value;
-        const bloque = document.getElementById("filtro-bloque-libre").value;
+        tbody.innerHTML = "";
 
-        if (!dia || !bloque) {
-            lista.innerHTML = "<li>Seleccione día y bloque.</li>";
-            return;
-        }
-
-        const salasOcupadas = horarios
-            .filter(h => h.DIA === dia /* y si tuvieras bloque también aquí */)
-            .map(h => h.SALA);
-
-        const todasSalas = [...new Set(horarios.map(h => h.SALA))];
-
-        const libres = todasSalas.filter(s => !salasOcupadas.includes(s));
-
-        if (libres.length === 0) {
-            lista.innerHTML = "<li>No hay salas libres.</li>";
-            return;
-        }
-
-        libres.forEach(s => {
-            const li = document.createElement("li");
-            li.textContent = s;
-            lista.appendChild(li);
-        });
+        horarios
+            .filter(h =>
+                (diaFiltro === "" || h.DIA === diaFiltro) &&
+                (salaFiltro === "" || h.SALA.toLowerCase().includes(salaFiltro)) &&
+                (profeFiltro === "" || h.PROFESOR.toLowerCase().includes(profeFiltro)) &&
+                (deptoFiltro === "" || h.DEPTO.toLowerCase().includes(deptoFiltro))
+            )
+            .forEach(h => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${h.SIGLA}</td>
+                    <td>${h.NOMBRE}</td>
+                    <td>${h.DEPTO}</td>
+                    <td>${h.PARALELO}</td>
+                    <td>${h.DIA}</td>
+                    <td>${h.HORA}</td>
+                    <td>${h.SALA}</td>
+                    <td>${h.ASIG}</td>
+                `;
+                tbody.appendChild(tr);
+            });
     }
+
 
     document.getElementById("filtro-dia-libre").onchange = calcularSalasLibres;
     document.getElementById("filtro-bloque-libre").oninput = calcularSalasLibres;

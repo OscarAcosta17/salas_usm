@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Salas USM</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<h1>Salas USM</h1>
+
+<p id="updated"></p>
+
+<hr>
+
+<h2>Horarios</h2>
+
+<div class="filtros">
+    <label>Filtrar por día:</label>
+    <select id="filtro-dia">
+        <option value="">Todos</option>
+        <option value="Lunes">Lunes</option>
+        <option value="Martes">Martes</option>
+        <option value="Miércoles">Miércoles</option>
+        <option value="Jueves">Jueves</option>
+        <option value="Viernes">Viernes</option>
+    </select>
+
+    <label>Filtrar por sala:</label>
+    <input type="text" id="filtro-sala" placeholder="Ej: A014">
+
+    <label>Filtrar por profesor</label>
+    <input type="text" id="filtro-profe" placeholder="Ej: Ricardo Salas">
+
+    <label>Filtrar por departamento:</label>
+    <input type="text" id="filtro-depto" placeholder="Ej: Eléctrica">
+</div>
+
+<table id="tabla-horarios">
+    <thead>
+        <tr>
+            <th>Sigla</th>
+            <th>Nombre</th>
+            <th>Departamento</th>
+            <th>Paralelo</th>
+            <th>Día</th>
+            <th>Hora</th>
+            <th>Sala</th>
+            <th>Tipo</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+
+<hr>
+<script src="scripts/loadData.js"></script>
+</body>
+</html>
