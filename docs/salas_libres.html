@@ -6,8 +6,6 @@
     <link rel="icon" type="image/png" href="icono.png">
 
     <title>Salas Libres - USM</title>
-    
-    <script src="scripts/loadData.js" defer></script>
 
     <style>
         /* --- ESTILOS GENERALES (Consistentes) --- */
@@ -19,7 +17,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212; /* Negro Mate */
+            background-color: #121212;
             color: #ffffff;
             display: flex;
             flex-direction: column;
@@ -30,22 +28,21 @@
             flex: 1;
             display: flex;
             justify-content: center;
-            align-items: center; /* Centrado vertical */
+            align-items: center;
             padding: 40px 20px;
             width: 100%;
         }
 
         .bloque {
-            background-color: #2c2c2c; /* Gris Opaco */
+            background-color: #2c2c2c;
             padding: 40px;
             border-radius: 15px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             width: 100%;
-            max-width: 600px; /* Ancho más contenido para esta vista */
+            max-width: 600px;
             text-align: center;
         }
 
-        /* --- HEADER Y BOTÓN VOLVER --- */
         .header-top {
             display: flex;
             justify-content: space-between;
@@ -76,13 +73,12 @@
             background-color: #616161;
         }
 
-        /* --- FILTROS --- */
         .filtros {
             display: flex;
             gap: 20px;
             justify-content: center;
             margin-bottom: 30px;
-            flex-wrap: wrap; /* Para móviles */
+            flex-wrap: wrap;
         }
 
         .input-group {
@@ -99,8 +95,8 @@
             color: #aaa;
         }
 
-        /* Inputs Oscuros */
-        select, input {
+        select,
+        input {
             padding: 12px;
             background-color: #383838;
             border: 1px solid #555;
@@ -111,37 +107,35 @@
             width: 100%;
         }
 
-        select:focus, input:focus {
+        select:focus,
+        input:focus {
             border-color: #3498db;
         }
 
-        /* --- LISTA DE RESULTADOS --- */
         ul {
-            list-style: none; /* Quitar puntos */
+            list-style: none;
             padding: 0;
             margin: 0;
-            max-height: 400px; /* Scroll interno si hay muchas salas */
-            overflow-y: auto; 
+            max-height: 400px;
+            overflow-y: auto;
         }
 
-        /* Estilo de cada item de la lista (Tarjeta) */
         li {
-            background-color: #3a3a3a; /* Un poco más claro que el bloque */
+            background-color: #3a3a3a;
             margin-bottom: 10px;
             padding: 15px;
             border-radius: 8px;
             font-size: 18px;
-            border-left: 5px solid #3498db; /* Detalle de color decorativo */
+            border-left: 5px solid #3498db;
             text-align: left;
             transition: transform 0.2s;
         }
 
         li:hover {
             background-color: #444;
-            transform: translateX(5px); /* Efecto visual al pasar el mouse */
+            transform: translateX(5px);
         }
 
-        /* Mensaje por defecto cuando no hay selección */
         li:first-child:only-child {
             text-align: center;
             border-left: none;
@@ -150,19 +144,19 @@
             font-style: italic;
         }
 
-        /* Scrollbar personalizada para la lista */
         ul::-webkit-scrollbar {
             width: 8px;
         }
+
         ul::-webkit-scrollbar-track {
             background: #2c2c2c;
         }
+
         ul::-webkit-scrollbar-thumb {
             background: #555;
             border-radius: 4px;
         }
 
-        /* --- FOOTER --- */
         footer {
             text-align: center;
             padding: 20px;
@@ -177,7 +171,7 @@
 
     <div class="main-container">
         <div class="bloque">
-            
+
             <div class="header-top">
                 <h1>Salas Disponibles</h1>
                 <a href="index.html" class="btn-nav">← Volver</a>
@@ -212,6 +206,97 @@
     <footer>
         &copy; 2025 Salas USM. Todos los derechos reservados.
     </footer>
+
+
+<!-- ========================================================= -->
+<!--            LÓGICA COMPLETA DE SALAS LIBRES                -->
+<!-- ========================================================= -->
+
+<script>
+let datos = [];
+
+/* ------------------ 1. Cargar JSON ------------------ */
+async function cargarDatos() {
+    const res = await fetch("data/salas.json");
+    datos = await res.json();
+}
+
+/* ------------------ 2. Convertir hora → bloque ------------------ */
+function horaABloque(hora) {
+    const inicio = hora.split("-")[0];
+    const [h, m] = inicio.split(":").map(n => parseInt(n));
+    const minutos = h * 60 + m;
+
+    const rangos = [
+        { bloque: 1, ini: 8*60 + 15, fin: 9*60 + 25 },
+        { bloque: 3, ini: 9*60 + 40, fin: 10*60 + 50 },
+        { bloque: 5, ini: 11*60 + 5, fin: 12*60 + 15 },
+        { bloque: 7, ini: 12*60 + 30, fin: 13*60 + 40 },
+        { bloque: 9, ini: 14*60 + 40, fin: 15*60 + 50 },
+        { bloque: 11, ini: 16*60 + 5, fin: 17*60 + 15 },
+        { bloque: 13, ini: 17*60 + 30, fin: 18*60 + 40 },
+        { bloque: 15, ini: 18*60 + 55, fin: 20*60 + 5 }
+    ];
+
+    for (const r of rangos) {
+        if (minutos >= r.ini && minutos <= r.fin) return r.bloque;
+    }
+
+    return null;
+}
+
+/* ------------------ 3. Buscar salas libres ------------------ */
+function buscarSalasLibres() {
+    const dia = document.getElementById("filtro-dia-libre").value;
+    const bloqueUsuario = parseInt(document.getElementById("filtro-bloque-libre").value);
+
+    const lista = document.getElementById("lista-salas-libres");
+    lista.innerHTML = "";
+
+    if (!dia || !bloqueUsuario) {
+        lista.innerHTML = "<li>Seleccione un día y un bloque para ver resultados.</li>";
+        return;
+    }
+
+    // Convertir bloque par → bloque impar
+    const bloqueReal = bloqueUsuario % 2 === 0 ? bloqueUsuario - 1 : bloqueUsuario;
+
+    const salasOcupadas = new Set();
+
+    datos.forEach(r => {
+        if (r.DIA !== dia) return;
+
+        const b = horaABloque(r.HORA);
+
+        if (b === bloqueReal) {
+            salasOcupadas.add(r.SALA);
+        }
+    });
+
+    const salasTodas = [...new Set(datos.map(r => r.SALA))];
+    const salasLibres = salasTodas.filter(s => !salasOcupadas.has(s));
+
+    if (salasLibres.length === 0) {
+        lista.innerHTML = "<li>No hay salas libres en ese bloque.</li>";
+        return;
+    }
+
+    salasLibres.sort();
+
+    salasLibres.forEach(s => {
+        const li = document.createElement("li");
+        li.textContent = s;
+        lista.appendChild(li);
+    });
+}
+
+/* ------------------ 4. Activar eventos ------------------ */
+document.getElementById("filtro-dia-libre").addEventListener("change", buscarSalasLibres);
+document.getElementById("filtro-bloque-libre").addEventListener("input", buscarSalasLibres);
+
+/* ------------------ 5. Cargar datos al inicio ------------------ */
+cargarDatos();
+</script>
 
 </body>
 </html>
