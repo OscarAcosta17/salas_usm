@@ -1,5 +1,5 @@
 async function cargarSalas() {
-  const res = await fetch("data/salas.json");
+  const res = await fetch("../data/salas.json");
   const data = await res.json();
 
   document.getElementById("ultima-actualizacion").textContent =
