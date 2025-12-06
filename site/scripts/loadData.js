@@ -1,45 +1,24 @@
-async function cargarSalas() {
-  const res = await fetch("../data/salas.json");
-  const data = await res.json();
+async function cargar() {
+    const res = await fetch("../data/salas.json");
+    const json = await res.json();
 
-  document.getElementById("ultima-actualizacion").textContent =
-    "Última actualización: " + data.updated;
+    document.getElementById("updated").innerText =
+        "Última actualización: " + json.updated;
 
-  const tbody = document.querySelector("#tabla-salas tbody");
-  const selectCampus = document.getElementById("filtro-campus");
+    const tbody = document.querySelector("#tabla tbody");
 
-  const salas = data.salas;
-
-  // Rellenar combo de campus únicos
-  const campusSet = new Set(salas.map(s => s.campus));
-  campusSet.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    selectCampus.appendChild(opt);
-  });
-
-  function renderTabla(filtroCampus = "") {
-    tbody.innerHTML = "";
-    salas
-      .filter(s => !filtroCampus || s.campus === filtroCampus)
-      .forEach(s => {
+    json.asignaturas.forEach(a => {
         const tr = document.createElement("tr");
+
         tr.innerHTML = `
-          <td>${s.sala}</td>
-          <td>${s.campus}</td>
-          <td>${s.dia}</td>
-          <td>${s.bloque}</td>
+            <td>${a.sigla}</td>
+            <td>${a.asignatura}</td>
+            <td>${a.departamento}</td>
+            <td>${a.paralelo}</td>
         `;
+
         tbody.appendChild(tr);
-      });
-  }
-
-  selectCampus.addEventListener("change", () => {
-    renderTabla(selectCampus.value);
-  });
-
-  renderTabla();
+    });
 }
 
-cargarSalas();
+cargar();
