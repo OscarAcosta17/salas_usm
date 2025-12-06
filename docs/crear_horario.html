@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Horario - Salas USM</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f7;
+        }
+
+        /* Barra superior */
+        .topbar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 25px;
+            font-size: 22px;
+        }
+
+        .topbar a {
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Contenedor principal dividido en 2 */
+        .container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        /* Panel izquierdo */
+        .left-panel {
+            width: 35%;
+            border-right: 2px solid #ddd;
+            padding: 20px;
+            background: white;
+            overflow-y: auto;
+        }
+
+        .left-panel h2 {
+            margin-top: 0;
+        }
+
+        .search-box input {
+            width: 90%;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .result-item {
+            background: #ecf0f1;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .result-item:hover {
+            background: #d0d7de;
+        }
+
+        /* Panel derecho - horario */
+        .right-panel {
+            width: 65%;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .horario-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .horario-table th,
+        .horario-table td {
+            border: 1px solid #bbb;
+            text-align: center;
+            padding: 10px;
+            vertical-align: middle;
+        }
+
+        .horario-table th {
+            background: #3498db;
+            color: white;
+        }
+
+        .cell {
+            height: 40px;
+        }
+    </style>
+
+</head>
+<body>
+
+    <!-- Barra superior -->
+    <div class="topbar">
+        <a href="index.html">Salas USM</a>
+    </div>
+
+    <div class="container">
+
+        <!-- Panel izquierdo -->
+        <div class="left-panel">
+            <h2>Buscar ramo por sigla</h2>
+
+            <div class="search-box">
+                <input type="text" id="buscar-ramos" placeholder="Ej: MAT201, ELI328">
+            </div>
+
+            <div id="resultados-ramos"></div>
+        </div>
+
+        <!-- Panel derecho -->
+        <div class="right-panel">
+            <h2>Horario Semanal</h2>
+
+            <table class="horario-table">
+                <thead>
+                    <tr>
+                        <th>Bloque</th>
+                        <th>Lunes</th>
+                        <th>Martes</th>
+                        <th>Miércoles</th>
+                        <th>Jueves</th>
+                        <th>Viernes</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-horario">
+                    <!-- Se rellenan filas dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        // ------------------------
+        // GENERAR TABLA DE BLOQUES
+        // ------------------------
+
+        const tbody = document.getElementById("tabla-horario");
+
+        const bloques = [
+            "1-2","3-4","5-6","7-8","9-10","11-12","13-14","15-16"
+        ];
+
+        bloques.forEach(b => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><b>${b}</b></td>
+                <td class="cell"></td>
+                <td class="cell"></td>
+                <td class="cell"></td>
+                <td class="cell"></td>
+                <td class="cell"></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // ------------------------
+        // BUSCADOR DE RAMOS
+        // ------------------------
+
+        document.getElementById("buscar-ramos").addEventListener("input", function () {
+            const texto = this.value.toLowerCase();
+            const contenedor = document.getElementById("resultados-ramos");
+            contenedor.innerHTML = "";
+
+            if (texto.length < 2) return;
+
+            // Más adelante aquí cargaremos JSON real
+            // Por ahora agrego resultados falsos para probar
+            const ejemplos = [
+                { sigla: "MAT201", nombre: "Cálculo II" },
+                { sigla: "ELI328", nombre: "Accionamientos Eléctricos I" },
+                { sigla: "INF236", nombre: "Base de Datos" }
+            ];
+
+            const filtrados = ejemplos.filter(r =>
+                r.sigla.toLowerCase().includes(texto)
+            );
+
+            filtrados.forEach(r => {
+                const div = document.createElement("div");
+                div.className = "result-item";
+                div.textContent = `${r.sigla} - ${r.nombre}`;
+                contenedor.appendChild(div);
+            });
+        });
+
+    </script>
+
+</body>
+</html>
