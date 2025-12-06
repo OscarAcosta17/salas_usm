@@ -15,6 +15,10 @@ def parse_pdf():
 
     resultados = []
 
+    # ⚠️ Mantener contexto entre páginas
+    sigla_actual = None
+    nombre_curso_actual = None
+
     with pdfplumber.open(PDF_FILE) as pdf:
         for page in pdf.pages:
             tablas = page.extract_tables()
@@ -22,18 +26,16 @@ def parse_pdf():
                 continue
 
             tabla = tablas[0]
-            sigla_actual = None
-            nombre_curso_actual = None
 
             for fila in tabla:
                 if not fila:
                     continue
 
-                # 1) Fila de encabezado general (Sigla / Asignatura / ...)
+                # 1) Fila cabecera global de la tabla
                 if fila[0] and "Sigla" in fila[0]:
                     continue
 
-                # 2) Fila de "curso": toda la info (sigla, nombre, depto, profe, etc.)
+                # 2) Fila de "curso": incluye sigla, nombre, depto, profe, etc.
                 if fila[0] and not fila[0].startswith("Día Bloque"):
                     header = fila[0]
                     lineas = header.splitlines()
@@ -46,19 +48,19 @@ def parse_pdf():
                             sigla = t
                             break
 
-                    sigla_actual = sigla
+                    sigla_actual = sigla or sigla_actual  # si no encuentra, mantiene la anterior
 
-                    # Usamos todo lo que viene antes de la sigla como "nombre del curso"
+                    # Nombre del curso (muy aproximado)
                     if sigla and sigla in tokens:
                         idx = tokens.index(sigla)
                         nombre_curso_actual = " ".join(tokens[:idx])
-                    else:
-                        nombre_curso_actual = lineas[0] if lineas else ""
+                    elif lineas:
+                        nombre_curso_actual = lineas[0]
+                    # si tampoco hay, mantiene nombre_curso_actual anterior
 
                     continue
 
-                # 3) Filas de horario (día / bloque / hora / sala / etc.)
-                #    Día está en la columna 6 (índice 6) cuando hay horario
+                # 3) Filas de horario (día / bloque / hora / sala / sede / tipo)
                 if len(fila) > 7 and fila[6] in ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"]:
                     dia = fila[6]
 
@@ -68,7 +70,6 @@ def parse_pdf():
                     salas = fila[10].split("\n") if len(fila) > 10 and fila[10] else [""]
                     sedes = fila[11].split("\n") if len(fila) > 11 and fila[11] else [""]
 
-                    # Asegurar que todas las listas tengan el mismo largo
                     max_len = max(len(bloques), len(horas), len(salas), len(sedes))
 
                     def pad(lst):
@@ -84,8 +85,8 @@ def parse_pdf():
                             continue
 
                         resultados.append({
-                            "sigla": sigla_actual,
-                            "curso": nombre_curso_actual,
+                            "sigla": sigla_actual,             # ← usa la última sigla válida
+                            "curso": nombre_curso_actual or "",# ← usa último nombre válido
                             "dia": dia,
                             "bloque": b.strip(),
                             "hora": h.strip(),
