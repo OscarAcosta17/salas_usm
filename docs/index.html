@@ -2,55 +2,108 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salas USM</title>
 
     <style>
+        /* Reset básico */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212; /* Negro Mate */
+            color: #ffffff;
+            /* Configuración Flex para centrar el bloque y bajar el footer */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Contenedor principal que empuja el footer hacia abajo */
+        .main-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .bloque {
+            background-color: #2c2c2c; /* Gris Opaco */
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             text-align: center;
-            padding-top: 80px;
-            background: #f5f6fa;
+            max-width: 800px;
+            width: 90%;
         }
 
         h1 {
-            font-size: 32px;
-            color: #2c3e50;
+            font-size: 36px;
+            color: #e0e0e0;
             margin-bottom: 40px;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
 
         .btn-container {
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
         .btn-nav {
             padding: 15px 30px;
-            font-size: 20px;
-            cursor: pointer;
-            border-radius: 8px;
-            border: none;
-            color: white;
-            background-color: #3498db;
-            transition: 0.2s;
+            font-size: 18px;
+            background-color: #4a4a4a; /* Gris Claro */
+            color: #ffffff;
             text-decoration: none;
+            border-radius: 8px;
+            
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
 
         .btn-nav:hover {
-            background-color: #2980b9;
+            background-color: #616161;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Estilos del Footer (Copyright) */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666666; /* Un gris tenue para que no distraiga */
+            font-size: 14px;
+            border-top: 1px solid #1f1f1f; /* Una línea muy sutil arriba */
+            background-color: #121212;
         }
     </style>
 </head>
 
 <body>
 
-    <h1>Funcionalidades</h1>
-
-    <div class="btn-container">
-        <a href="horarios.html" class="btn-nav">Ver Horarios</a>
-        <a href="salas_libres.html" class="btn-nav">Ver Salas Libres</a>
-        <a href="crear_horario.html" class="btn-nav">Arma tu horario</a>
+    <div class="main-container">
+        <div class="bloque">
+            <h1>Funcionalidades</h1>
+            
+            <div class="btn-container">
+                <a href="horarios.html" class="btn-nav">Ver Horarios</a>
+                <a href="salas_libres.html" class="btn-nav">Ver Salas Libres</a>
+                <a href="crear_horario.html" class="btn-nav">Arma tu horario</a>
+            </div>
+        </div>
     </div>
+
+    <footer>
+        &copy; 2025 Salas USM. Página no afiliada a la USM.
+    </footer>
 
 </body>
 </html>

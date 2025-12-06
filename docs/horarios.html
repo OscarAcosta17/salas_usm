@@ -2,62 +2,242 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Salas USM</title>
-    <link rel="stylesheet" href="css/styles.css">
-     <a href="index.html" class="btn-nav">volver</a>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios - Salas USM</title>
+    <style>
+        /* --- ESTILOS GENERALES (Igual al anterior) --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212; /* Negro Mate */
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Alineado arriba para tablas largas */
+            padding: 40px 20px;
+            width: 100%;
+        }
+
+        .bloque {
+            background-color: #2c2c2c; /* Gris Opaco */
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 1200px; /* Más ancho para que quepa la tabla */
+            text-align: center;
+        }
+
+        /* --- ENCABEZADO Y NAVEGACIÓN --- */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #e0e0e0;
+            font-weight: 600;
+        }
+
+        .btn-nav {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4a4a4a;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 1px solid #5a5a5a;
+            transition: 0.3s;
+        }
+
+        .btn-nav:hover {
+            background-color: #616161;
+        }
+
+        /* --- FILTROS --- */
+        .filtros {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            text-align: left;
+            background-color: #222; /* Un poco más oscuro para diferenciar */
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        /* Estilo Dark para Inputs y Selects */
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background-color: #383838;
+            border: 1px solid #555;
+            border-radius: 5px;
+            color: white;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: #3498db; /* Azul al seleccionar */
+        }
+
+        ::placeholder {
+            color: #888;
+        }
+
+        .btn-limpiar {
+            padding: 10px;
+            background-color: #c0392b; /* Rojo suave para acción destructiva */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 24px; /* Alinear con los inputs */
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-limpiar:hover {
+            background-color: #e74c3c;
+        }
+
+        /* --- TABLA --- */
+        .table-responsive {
+            overflow-x: auto; /* Scroll horizontal si la pantalla es chica */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 15px;
+        }
+
+        thead {
+            background-color: #4a4a4a;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+
+        th {
+            color: #fff;
+            font-weight: 600;
+            white-space: nowrap; /* Evita que el título se parta */
+        }
+
+        tr:hover {
+            background-color: #3a3a3a; /* Efecto hover en filas */
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #1f1f1f;
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>Salas USM</h1>
+    <div class="main-container">
+        <div class="bloque">
+            
+            <div class="header-top">
+                <h1>Horarios USM</h1>
+                <a href="index.html" class="btn-nav">← Volver</a>
+            </div>
 
-<p id="updated"></p>
+            <p id="updated" style="color: #888; margin-bottom: 10px; font-size: 0.9em;"></p>
 
-<hr>
+            <div class="filtros">
+                <div>
+                    <label>Filtrar por día:</label>
+                    <select id="filtro-dia">
+                        <option value="">Todos</option>
+                        <option value="Lunes">Lunes</option>
+                        <option value="Martes">Martes</option>
+                        <option value="Miércoles">Miércoles</option>
+                        <option value="Jueves">Jueves</option>
+                        <option value="Viernes">Viernes</option>
+                    </select>
+                </div>
 
-<h2>Horarios</h2>
+                <div>
+                    <label>Filtrar por sala:</label>
+                    <input type="text" id="filtro-sala" placeholder="Ej: A014">
+                </div>
 
-<div class="filtros">
-    <label>Filtrar por día:</label>
-    <select id="filtro-dia">
-        <option value="">Todos</option>
-        <option value="Lunes">Lunes</option>
-        <option value="Martes">Martes</option>
-        <option value="Miércoles">Miércoles</option>
-        <option value="Jueves">Jueves</option>
-        <option value="Viernes">Viernes</option>
-    </select>
+                <div>
+                    <label>Filtrar por profesor:</label>
+                    <input type="text" id="filtro-profe" placeholder="Ej: Ricardo Salas">
+                </div>
 
-    <label>Filtrar por sala:</label>
-    <input type="text" id="filtro-sala" placeholder="Ej: A014">
+                <div>
+                    <label>Filtrar por depto:</label>
+                    <input type="text" id="filtro-depto" placeholder="Ej: Eléctrica">
+                </div>
 
-    <label>Filtrar por profesor</label>
-    <input type="text" id="filtro-profe" placeholder="Ej: Ricardo Salas">
+                <button id="btn-limpiar" class="btn-limpiar">Limpiar filtros</button>
+            </div>
 
-    <label>Filtrar por departamento:</label>
-    <input type="text" id="filtro-depto" placeholder="Ej: Eléctrica">
+            <div class="table-responsive">
+                <table id="tabla-horarios">
+                    <thead>
+                        <tr>
+                            <th>Sigla</th>
+                            <th>Nombre</th>
+                            <th>Depto</th>
+                            <th>Paralelo</th>
+                            <th>Profesor</th>
+                            <th>Día</th>
+                            <th>Hora</th>
+                            <th>Sala</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
 
-    <button id="btn-limpiar" class="btn-limpiar">Limpiar filtros</button>
-</div>
+        </div>
+    </div>
 
-<table id="tabla-horarios">
-    <thead>
-        <tr>
-            <th>Sigla</th>
-            <th>Nombre</th>
-            <th>Departamento</th>
-            <th>Paralelo</th>
-            <th>Profesor</th>
-            <th>Día</th>
-            <th>Hora</th>
-            <th>Sala</th>
-            <th>Tipo</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+    <footer>
+        &copy; 2025 Salas USM. Todos los derechos reservados.
+    </footer>
 
-
-<hr>
-<script src="scripts/loadData.js"></script>
+    <script src="scripts/loadData.js"></script>
 </body>
 </html>
