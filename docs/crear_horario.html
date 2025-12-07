@@ -206,29 +206,59 @@
     };
 
     // ============================================
-    // DESCARGAR IMAGEN (NUEVO)
+    // DESCARGAR IMAGEN (CORREGIDO)
     // ============================================
     document.getElementById("btn-descargar").onclick = () => {
         const elementoParaCapturar = document.getElementById("captura-horario");
-        
-        // Efecto visual de "cargando"
         const btn = document.getElementById("btn-descargar");
+        
+        // 1. Guardar estado original
+        const originalOverflow = elementoParaCapturar.style.overflow;
+        const originalMaxWidth = elementoParaCapturar.style.maxWidth;
+        const originalWidth = elementoParaCapturar.style.width;
         const textoOriginal = btn.innerText;
+
+        // 2. Forzar expansión completa para que html2canvas lo vea todo
+        // Quitamos el scroll y permitimos que la tabla se estire lo que necesite
+        elementoParaCapturar.style.overflow = "visible"; 
+        elementoParaCapturar.style.maxWidth = "none";
+        elementoParaCapturar.style.width = "fit-content"; 
+        
         btn.innerText = "Generando...";
 
-        html2canvas(elementoParaCapturar, {
-            backgroundColor: "#1e1e1e", // Asegura que el fondo oscuro salga en la foto
-            scale: 2 // Mejora la calidad (resolución) de la imagen
-        }).then(canvas => {
-            // Crear enlace temporal
-            const link = document.createElement('a');
-            link.download = 'horario_usm.png';
-            link.href = canvas.toDataURL("image/png");
-            link.click();
+        // Esperamos un micro-momento para que el navegador procese el cambio de estilo
+        setTimeout(() => {
+            html2canvas(elementoParaCapturar, {
+                backgroundColor: "#1e1e1e",
+                scale: 2, // Buena calidad
+                // Forzamos a capturar el ancho/alto completo del elemento expandido
+                width: elementoParaCapturar.scrollWidth,
+                height: elementoParaCapturar.scrollHeight,
+                windowWidth: elementoParaCapturar.scrollWidth,
+                windowHeight: elementoParaCapturar.scrollHeight,
+                x: 0,
+                y: 0
+            }).then(canvas => {
+                // Descargar
+                const link = document.createElement('a');
+                link.download = 'horario_usm.png';
+                link.href = canvas.toDataURL("image/png");
+                link.click();
 
-            // Restaurar texto del botón
-            btn.innerText = textoOriginal;
-        });
+                // 3. Restaurar estilos originales (volver a poner scroll si es necesario)
+                elementoParaCapturar.style.overflow = originalOverflow;
+                elementoParaCapturar.style.maxWidth = originalMaxWidth;
+                elementoParaCapturar.style.width = originalWidth;
+                btn.innerText = textoOriginal;
+            }).catch(err => {
+                console.error("Error al capturar:", err);
+                // Restaurar incluso si falla
+                elementoParaCapturar.style.overflow = originalOverflow;
+                elementoParaCapturar.style.maxWidth = originalMaxWidth;
+                elementoParaCapturar.style.width = originalWidth;
+                btn.innerText = textoOriginal;
+            });
+        }, 100);
     };
 </script>
 
