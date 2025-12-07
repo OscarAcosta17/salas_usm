@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malla Interactiva - Salas USM</title>
+    <link rel="icon" type="image/png" href="icono.png">
+
+    <style>
+        /* --- ESTILOS GENERALES (Dark Mode) --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .topbar {
+            background-color: #1f1f1f;
+            border-bottom: 1px solid #333;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 50px;
+            flex-shrink: 0;
+        }
+
+        .logo { font-size: 20px; font-weight: 600; color: #e0e0e0; text-decoration: none; }
+        .btn-nav {
+            padding: 5px 12px; font-size: 13px; background-color: #4a4a4a;
+            color: #ffffff; text-decoration: none; border-radius: 6px;
+            border: 1px solid #5a5a5a; transition: 0.3s;
+        }
+        .btn-nav:hover { background-color: #616161; }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .container {
+            flex: 1;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+        }
+
+        /* --- BARRA DE PROGRESO --- */
+        .controls-area {
+            background-color: #2c2c2c;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-shrink: 0;
+        }
+
+        .progress-wrapper { flex: 1; }
+        .progress-text { margin-bottom: 4px; color: #ccc; font-size: 13px; display: flex; justify-content: space-between;}
+        .progress-bar-bg { background: #444; height: 10px; border-radius: 5px; overflow: hidden; }
+        .progress-bar-fill { background: #27ae60; height: 100%; width: 0%; transition: width 0.3s; }
+
+        .reset-btn {
+            background: #c0392b; color: white; border: none; padding: 6px 12px;
+            border-radius: 4px; cursor: pointer; font-size: 12px;
+        }
+
+        /* --- GRID DE LA MALLA --- */
+        .malla-wrapper {
+            flex: 1;
+            overflow: auto;
+            padding-bottom: 20px;
+            scrollbar-width: thin;
+            scrollbar-color: #555 #1e1e1e;
+        }
+
+        .malla-grid {
+            display: grid;
+            grid-template-columns: repeat(11, minmax(110px, 1fr)); 
+            gap: 6px;
+            width: 100%;
+            min-width: 1200px;
+        }
+
+        /* --- CABECERAS --- */
+        .header-cell {
+            color: #ddd;
+            text-align: center;
+            padding: 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            user-select: none;
+            border: 1px solid #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .header-cell:hover { background-color: #444; color: #fff; border-color: #666; }
+        
+        .year-header {
+            grid-column: span 2;
+            background-color: #2c3e50;
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .year-header.last-year { grid-column: span 1; }
+
+        .semestre-header { background-color: #222; color: #aaa; margin-bottom: 8px; }
+
+        .col-stack { display: flex; flex-direction: column; gap: 6px; }
+
+        /* --- TARJETA RAMO --- */
+        .ramo-card {
+            height: 90px;
+            padding: 5px;
+            border-radius: 5px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 12px;
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border: 2px solid transparent; 
+
+            /* ESTADO 1: BLOQUEADO (Por defecto: Opaco) */
+            opacity: 0.25;
+            filter: grayscale(90%);
+            background-color: #333; 
+        }
+
+        .ramo-card:hover { 
+            transform: scale(1.05); 
+            z-index: 20; 
+            opacity: 0.8 !important; 
+        }
+
+        .ramo-sigla { font-weight: bold; font-size: 10px; margin-bottom: 3px; opacity: 0.9; }
+        .ramo-nombre { font-size: 11px; line-height: 1.1; font-weight: 500;}
+
+        /* ESTADO 2: HABILITADO (Prerrequisitos OK) - COLOR BRILLANTE */
+        .ramo-card.habilitado {
+            opacity: 1 !important;
+            filter: grayscale(0%) !important;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* ESTADO 3: APROBADO (Check) */
+        .ramo-card.aprobado {
+            opacity: 1 !important;
+            filter: grayscale(0%) !important;
+            border-color: #2ecc71; 
+            
+        }
+        
+        .ramo-card.aprobado::after {
+            content: "✔"; position: absolute; top: 2px; right: 4px; font-size: 14px; 
+            color: #2ecc71; text-shadow: 0 0 2px #000; background: rgba(0,0,0,0.5); border-radius: 50%;
+            width: 16px; height: 16px; line-height: 16px; display: block;
+        }
+
+        .ramo-card.is-prereq {
+            border-color: #f1c40f !important; 
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
+            opacity: 1 !important; 
+            filter: grayscale(0%) !important;
+            z-index: 15;
+        }
+
+        /* --- COLORES PERSONALIZADOS --- */
+        
+        /* 1. Verde Clarito */
+        .bg-verde-claro { 
+            background-color: #7fd023; 
+            color: #000 !important; 
+            font-weight: 600;
+        }
+        
+        /* 2. Rosado */
+        .bg-rosado { background-color: #d81b60; } 
+
+        /* 3. Rojo Oscuro */
+        .bg-rojo-oscuro { background-color: #8b0000; } 
+
+        /* 4. Verde Oscuro */
+        .bg-verde-oscuro { background-color: #105d15; } 
+
+        /* 5. Azul Oscuro */
+        .bg-azul-oscuro { background-color: #0d47a1; } 
+
+        /* 6. Amarillo */
+        .bg-amarillo { 
+            background-color: #fbc02d; 
+            color: #000 !important; 
+            font-weight: 600;
+        }
+
+        /* 7. Celeste */
+        .bg-celeste { background-color: #0288d1; } 
+
+        /* Colores Auxiliares */
+        .bg-plan-comun { background-color: #008080; } /* Teal */
+        .bg-infra { background-color: #6c3483; }      /* Morado */
+        .bg-electivo { background-color: #e67e22; }    /* Naranja */
+
+        /* LEYENDA */
+        .legend {
+            margin-top: 5px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            background: #222;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+        .legend-item { display: flex; align-items: center; gap: 5px; color: #ccc; }
+        .legend-color { width: 10px; height: 10px; border-radius: 2px; border: 1px solid #555; }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="topbar">
+        <a href="index.html" class="logo">Salas USM</a>
+        <a href="index.html" class="btn-nav">← Volver al menú</a>
+    </div>
+
+    <div class="container">
+        
+        <div class="controls-area">
+            <div class="progress-wrapper">
+                <div class="progress-text">
+                    <span>Avance de Carrera</span>
+                    <span id="percent-text">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+            </div>
+            <button class="reset-btn" onclick="resetMalla()">Reset</button>
+        </div>
+
+        <div class="malla-wrapper">
+            <div class="malla-grid" id="malla-grid">
+                </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color bg-plan-comun"></div>Plan Común</div>
+            <div class="legend-item"><div class="legend-color bg-azul-oscuro"></div>Ciencias Comp.</div>
+            <div class="legend-item"><div class="legend-color bg-amarillo"></div>Ing. Software</div>
+            <div class="legend-item"><div class="legend-color bg-infra"></div>Infraestructura</div>
+            <div class="legend-item"><div class="legend-color bg-verde-oscuro"></div>Ciencia de Datos</div>
+            <div class="legend-item"><div class="legend-color bg-rojo-oscuro"></div>Sist. Gestión</div>
+            <div class="legend-item"><div class="legend-color bg-celeste"></div>Industrias</div>
+            <div class="legend-item"><div class="legend-color bg-rosado"></div>Transversal</div>
+            <div class="legend-item"><div class="legend-color bg-verde-claro"></div>Humanista/Libre</div>
+            <div class="legend-item"><div class="legend-color bg-electivo"></div>Electivos</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // LÓGICA DE COLORES Y TIPOS
+        // ============================================
+        function getTipo(sigla) {
+            // 1. Verde Clarito: Humanistas, Deportes y Libres
+            // Cuidado con INF-134 que empieza con INF-1
+            if (sigla.startsWith('HRW') || sigla.startsWith('DEW') || sigla.includes('Libre') || 
+               (sigla.startsWith('INF-') && parseInt(sigla.split('-')[1]) < 10)) { // Libres INF-1 a INF-7
+                return 'verde-claro';
+            }
+
+            // 2. Rosado
+            const rosados = ['IWG-101', 'INF-228', 'INF-276', 'INF-309', 'INF-310'];
+            if (rosados.includes(sigla)) return 'rosado';
+
+            // 3. Rojo Oscuro
+            const rojosOscuros = ['INF-260', 'INF-270', 'INF-292', 'INF-293', 'INF-266', 'INF-360'];
+            if (rojosOscuros.includes(sigla)) return 'rojo-oscuro';
+
+            // 4. Verde Oscuro
+            const verdesOscuros = ['INF-280', 'INF-285', 'INF-295'];
+            if (verdesOscuros.includes(sigla)) return 'verde-oscuro';
+
+            // 5. Azul Oscuro
+            const azulesOscuros = ['IWI-131', 'INF-134', 'INF-253', 'INF-152', 'INF-155', 'INF-221'];
+            if (azulesOscuros.includes(sigla)) return 'azul-oscuro';
+
+            // 6. Amarillos
+            const amarillos = ['INF-239', 'INF-236', 'INF-225', 'INF-322'];
+            if (amarillos.includes(sigla)) return 'amarillo';
+
+            // 7. Celestes
+            const celestes = ['IWN-170', 'ICN-270'];
+            if (celestes.includes(sigla)) return 'celeste';
+
+            // --- OTROS (Por defecto) ---
+            if (sigla.startsWith('MAT') || sigla.startsWith('FIS') || sigla.startsWith('QUI')) return 'plan-comun';
+            
+            if (['INF-245', 'INF-246', 'INF-256', 'INF-343'].includes(sigla)) return 'infra';
+
+            if (sigla.includes('Electivo') || sigla.includes('305') || sigla.includes('306') || sigla.includes('307') || sigla.includes('308') || sigla.includes('311') || sigla.includes('312') || sigla.includes('313') || sigla.includes('314')) return 'electivo';
+
+            return 'azul-oscuro'; 
+        }
+
+        // ============================================
+        // DATA DE RAMOS
+        // ============================================
+        const RAMOS_DATA = [
+            // SEM 1
+            { sigla: 'IWI-131', nombre: 'Programacion', sem: 1, prereqs: [] },
+            { sigla: 'MAT-021', nombre: 'Matematicas I', sem: 1, prereqs: [] },
+            { sigla: 'FIS-100', nombre: 'Intro a la Fisica', sem: 1, prereqs: [] },
+            { sigla: 'HRW-132', nombre: 'Humanistico I', sem: 1, prereqs: [] },
+            { sigla: 'DEW-100', nombre: 'Educacion Fisica I', sem: 1, prereqs: [] },
+            // SEM 2
+            { sigla: 'QUI-010', nombre: 'Quimica y Sociedad', sem: 2, prereqs: [] },
+            { sigla: 'MAT-022', nombre: 'Matematicas II', sem: 2, prereqs: ['MAT-021'] },
+            { sigla: 'FIS-110', nombre: 'Fisica General I', sem: 2, prereqs: ['MAT-021','FIS-100'] },
+            { sigla: 'IWG-101', nombre: 'Intro a la Ingenieria', sem: 2, prereqs: [] },
+            { sigla: 'HRW-133', nombre: 'Humanistico II', sem: 2, prereqs: [] },
+            { sigla: 'DEW-101', nombre: 'Educacion Fisica II', sem: 2, prereqs: ['DEW-100'] },
+            // SEM 3
+            { sigla: 'INF-134', nombre: 'Estructuras de Datos', sem: 3, prereqs: ['IWI-131'] },
+            { sigla: 'MAT-023', nombre: 'Matematicas III', sem: 3, prereqs: ['MAT-022'] },
+            { sigla: 'FIS-130', nombre: 'Fisica General III', sem: 3, prereqs: ['MAT-022','FIS-110'] },
+            { sigla: 'INF-152', nombre: 'Estructuras Discretas', sem: 3, prereqs: ['IWI-131','MAT-021'] },
+            { sigla: 'INF-260', nombre: 'Teoria de Sistemas', sem: 3, prereqs: ['IWG-101'] },
+            { sigla: 'INF-1',   nombre: 'Libre I', sem: 3, prereqs: [] },
+            // SEM 4
+            { sigla: 'INF-253', nombre: 'Lenguajes de Programacion', sem: 4, prereqs: ['INF-134'] },
+            { sigla: 'MAT-024', nombre: 'Matematicas IV', sem: 4, prereqs: ['MAT-023'] },
+            { sigla: 'FIS-120', nombre: 'Fisica General II', sem: 4, prereqs: ['MAT-022','FIS-110'] },
+            { sigla: 'INF-155', nombre: 'Informatica Teorica', sem: 4, prereqs: ['INF-134','INF-152'] },
+            { sigla: 'IWN-170', nombre: 'Economia IA', sem: 4, prereqs: ['MAT-023'] },
+            { sigla: 'INF-3',   nombre: 'Libre II', sem: 4, prereqs: [] },
+            // SEM 5
+            { sigla: 'INF-239', nombre: 'Bases de Datos', sem: 5, prereqs: ['INF-134'] },
+            { sigla: 'INF-245', nombre: 'Arq y Org de Computadores', sem: 5, prereqs: ['INF-134'] },
+            { sigla: 'FIS-140', nombre: 'Fisica General IV', sem: 5, prereqs: ['FIS-120','FIS-130'] },
+            { sigla: 'INF-280', nombre: 'Estadistica Computacional', sem: 5, prereqs: ['IWI-131','MAT-023'] },
+            { sigla: 'INF-270', nombre: 'Org y Sist de Informacion', sem: 5, prereqs: ['INF-260'] },
+            { sigla: 'INF-3_2', nombre: 'Libre III', sem: 5, prereqs: [] },
+            // SEM 6
+            { sigla: 'INF-236', nombre: 'Analisis y Diseno de SW', sem: 6, prereqs: ['INF-239','INF-253'] },
+            { sigla: 'INF-246', nombre: 'Sistemas Operativos', sem: 6, prereqs: ['INF-245'] },
+            { sigla: 'INF-276', nombre: 'Ing Info y Sociedad', sem: 6, prereqs: ['INF-270'] },
+            { sigla: 'INF-221', nombre: 'Algoritmos y Complejidad', sem: 6, prereqs: ['INF-152','INF-253'] },
+            { sigla: 'INF-292', nombre: 'Optimizacion', sem: 6, prereqs: ['MAT-023'] },
+            { sigla: 'INF-4',   nombre: 'Libre IV', sem: 6, prereqs: [] },
+            // SEM 7
+            { sigla: 'INF-225', nombre: 'Ingenieria de Software', sem: 7, prereqs: ['INF-236'] },
+            { sigla: 'INF-256', nombre: 'Redes de Computadores', sem: 7, prereqs: ['INF-246'] },
+            { sigla: 'ICN-270', nombre: 'Info y Mat Financieras', sem: 7, prereqs: ['IWN-170'] },
+            { sigla: 'INF-285', nombre: 'Computacion Cientifica', sem: 7, prereqs: ['MAT-024','INF-221'] },
+            { sigla: 'INF-293', nombre: 'Investigacion Operaciones', sem: 7, prereqs: ['INF-292','INF-280'] },
+            { sigla: 'INF-5',   nombre: 'Libre V', sem: 7, prereqs: [] },
+            // SEM 8
+            { sigla: 'INF-322', nombre: 'Diseno Interfaces Usuarias', sem: 8, prereqs: ['INF-225'] },
+            { sigla: 'INF-343', nombre: 'Sistemas Distribuidos', sem: 8, prereqs: ['INF-256'] },
+            { sigla: 'INF-305', nombre: 'Electivo Informatica I', sem: 8, prereqs: [] },
+            { sigla: 'INF-295', nombre: 'Inteligencia Artificial', sem: 8, prereqs: ['INF-221','INF-292'] },
+            { sigla: 'INF-266', nombre: 'Sistemas de Gestion', sem: 8, prereqs: ['INF-276'] },
+            { sigla: 'INF-6',   nombre: 'Libre VI', sem: 8, prereqs: [] },
+            // SEM 9
+            { sigla: 'INF-306', nombre: 'Electivo Informatica II', sem: 9, prereqs: [] },
+            { sigla: 'INF-307', nombre: 'Electivo Informatica III', sem: 9, prereqs: [] },
+            { sigla: 'INF-311', nombre: 'Electivo I', sem: 9, prereqs: [] },
+            { sigla: 'INF-312', nombre: 'Electivo II', sem: 9, prereqs: [] },
+            { sigla: 'INF-360', nombre: 'Gestion Proyectos Info', sem: 9, prereqs: ['INF-322','INF-266'] },
+            { sigla: 'INF-7',   nombre: 'Libre VII', sem: 9, prereqs: [] },
+            // SEM 10
+            { sigla: 'INF-308', nombre: 'Electivo Informatica IV', sem: 10, prereqs: [] },
+            { sigla: 'INF-313', nombre: 'Electivo III', sem: 10, prereqs: [] },
+            { sigla: 'INF-314', nombre: 'Electivo IV', sem: 10, prereqs: [] },
+            { sigla: 'INF-228', nombre: 'Taller Des. Proyecto', sem: 10, prereqs: ['INF-360'] },
+            { sigla: 'INF-309', nombre: 'Trabajo de Titulo I', sem: 10, prereqs: ['INF-360'] },
+            // SEM 11
+            { sigla: 'INF-310', nombre: 'Trabajo de Titulo II', sem: 11, prereqs: ['INF-228','INF-309'] }
+        ];
+
+        let aprobados = JSON.parse(localStorage.getItem('malla_aprobados_v4')) || [];
+
+        function renderMalla() {
+            const grid = document.getElementById('malla-grid');
+            grid.innerHTML = '';
+
+            // --- FILA 1: AÑOS ---
+            for (let i = 1; i <= 6; i++) {
+                const yearHeader = document.createElement('div');
+                yearHeader.className = `header-cell year-header ${i===6 ? 'last-year' : ''}`;
+                yearHeader.innerText = `AÑO ${i}`;
+                yearHeader.title = `Marcar Año ${i}`;
+                yearHeader.onclick = () => toggleAnio(i);
+                grid.appendChild(yearHeader);
+            }
+
+            // --- FILA 2: SEMESTRES ---
+            for (let i = 1; i <= 11; i++) {
+                const semHeader = document.createElement('div');
+                semHeader.className = 'header-cell semestre-header';
+                semHeader.innerText = numeroRomano(i);
+                semHeader.title = `Marcar Semestre ${i}`;
+                semHeader.onclick = () => toggleSemestre(i);
+                grid.appendChild(semHeader);
+            }
+
+            // --- FILA 3: RAMOS ---
+            for (let i = 1; i <= 11; i++) {
+                const colStack = document.createElement('div');
+                colStack.className = 'col-stack';
+                const ramos = RAMOS_DATA.filter(r => r.sem === i);
+                
+                ramos.forEach(ramo => {
+                    const tipo = getTipo(ramo.sigla);
+                    const card = document.createElement('div');
+                    card.className = `ramo-card bg-${tipo}`;
+                    card.id = `card-${ramo.sigla}`;
+
+                    // LÓGICA DE ESTADOS
+                    const isAprobado = aprobados.includes(ramo.sigla);
+                    const prereqsCumplidos = ramo.prereqs.every(p => aprobados.includes(p));
+
+                    if (isAprobado) {
+                        card.classList.add('aprobado');
+                    } else if (prereqsCumplidos) {
+                        card.classList.add('habilitado');
+                    }
+
+                    card.innerHTML = `
+                        <div class="ramo-sigla">${ramo.sigla}</div>
+                        <div class="ramo-nombre">${ramo.nombre}</div>
+                    `;
+
+                    card.onclick = () => toggleRamo(ramo, card);
+                    card.onmouseenter = () => highlightPrereqs(ramo.prereqs);
+                    card.onmouseleave = () => removeHighlights();
+
+                    colStack.appendChild(card);
+                });
+
+                grid.appendChild(colStack);
+            }
+            actualizarBarra();
+        }
+
+        // --- MANEJO DE CLICKS ---
+        function toggleRamo(ramo, cardElement) {
+            const sigla = ramo.sigla;
+            if (aprobados.includes(sigla)) {
+                aprobados = aprobados.filter(s => s !== sigla);
+            } else {
+                aprobados.push(sigla);
+            }
+            guardar();
+            renderMalla(); // Re-render completo
+        }
+
+        function toggleSemestre(semNum) {
+            const ramosSem = RAMOS_DATA.filter(r => r.sem === semNum);
+            const todosAprobados = ramosSem.every(r => aprobados.includes(r.sigla));
+
+            if (todosAprobados) {
+                ramosSem.forEach(r => aprobados = aprobados.filter(s => s !== r.sigla));
+            } else {
+                ramosSem.forEach(r => { if(!aprobados.includes(r.sigla)) aprobados.push(r.sigla); });
+            }
+            guardar();
+            renderMalla();
+        }
+
+        function toggleAnio(anioNum) {
+            const semInicio = (anioNum - 1) * 2 + 1;
+            const semFin = (anioNum === 6) ? 11 : semInicio + 1;
+            const ramosAnio = RAMOS_DATA.filter(r => r.sem >= semInicio && r.sem <= semFin);
+            const todosAprobados = ramosAnio.every(r => aprobados.includes(r.sigla));
+
+            if (todosAprobados) {
+                ramosAnio.forEach(r => aprobados = aprobados.filter(s => s !== r.sigla));
+            } else {
+                ramosAnio.forEach(r => { if(!aprobados.includes(r.sigla)) aprobados.push(r.sigla); });
+            }
+            guardar();
+            renderMalla();
+        }
+
+        // --- AUXILIARES ---
+        function highlightPrereqs(prereqs) {
+            if (!prereqs) return;
+            prereqs.forEach(sigla => {
+                const el = document.getElementById(`card-${sigla}`);
+                if (el) el.classList.add('is-prereq');
+            });
+        }
+
+        function removeHighlights() {
+            document.querySelectorAll('.is-prereq').forEach(el => el.classList.remove('is-prereq'));
+        }
+
+        function actualizarBarra() {
+            const total = RAMOS_DATA.length;
+            const count = aprobados.length;
+            const percent = Math.round((count / total) * 100) || 0;
+            document.getElementById('progress-fill').style.width = percent + "%";
+            document.getElementById('percent-text').innerText = percent + "% (" + count + "/" + total + ")";
+        }
+
+        function guardar() {
+            localStorage.setItem('malla_aprobados_v4', JSON.stringify(aprobados));
+        }
+
+        function resetMalla() {
+            if(confirm("¿Borrar todo el progreso?")) {
+                aprobados = [];
+                guardar();
+                renderMalla();
+            }
+        }
+
+        function numeroRomano(num) {
+            const romans = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+            return romans[num - 1] || num;
+        }
+
+        window.onload = renderMalla;
+
+    </script>
+</body>
+</html>

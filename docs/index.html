@@ -61,6 +61,12 @@
             margin: 0 auto; /* Centramos la rejilla */
         }
 
+        .btn-container a:last-child:nth-child(odd) {
+            grid-column: span 2;  /* Hace que ocupe las 2 columnas */
+            width: 50%;           /* Opcional: Para que no sea tan ancho */
+            margin: 0 auto;       /* Centrado */
+        }
+
         /* Para pantallas muy pequeñas (celulares), que se pongan en 1 sola columna */
         @media (max-width: 500px) {
             .btn-container {
@@ -114,6 +120,7 @@
                 <a href="salas_libres.html" class="btn-nav">Ver Salas Libres</a>
                 <a href="crear_horario.html" class="btn-nav">Arma tu horario</a>
                 <a href="promedios.html" class="btn-nav">Calcular promedio</a>
+                <a href="malla.html" class="btn-nav">Malla Interactiva</a>
             </div>
         </div>
     </div>
