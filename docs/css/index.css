@@ -1,0 +1,118 @@
+/* estilos_index.css */
+
+/* --- RESET BÁSICO --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212; /* Negro Mate */
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* --- ESTRUCTURA PRINCIPAL --- */
+.main-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 20px; /* Agregado padding para que no pegue en bordes de celular */
+}
+
+.bloque {
+    background-color: #2c2c2c; /* Gris Opaco */
+    padding: 50px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    max-width: 800px;
+    width: 100%; /* Ocupa el ancho disponible */
+}
+
+h1 {
+    font-size: 36px;
+    color: #e0e0e0;
+    margin-bottom: 40px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* --- BOTONES (GRID SYSTEM) --- */
+.btn-container {
+    display: grid; 
+    grid-template-columns: 1fr 1fr; /* 2 Columnas en PC */
+    gap: 20px;
+    max-width: 600px; 
+    margin: 0 auto; 
+}
+
+/* Estilo de los botones */
+.btn-nav {
+    padding: 15px 10px;
+    font-size: 18px;
+    background-color: #4a4a4a; 
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border: 1px solid #5a5a5a; /* Borde sutil para definición */
+}
+
+.btn-nav:hover {
+    background-color: #3498db; /* Azul al pasar el mouse (mejor feedback) */
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    border-color: #3498db;
+}
+
+/* --- RESPONSIVE DESIGN (CELULAR) --- */
+/* Regla especial para centrar el último botón impar en PC */
+.btn-container a:last-child:nth-child(odd) {
+    grid-column: span 2; 
+    width: 60%; 
+    margin: 0 auto; 
+}
+
+/* Ajustes para pantallas menores a 600px (Celulares) */
+@media (max-width: 600px) {
+    .bloque {
+        padding: 30px 20px; /* Menos relleno interno en celular */
+    }
+
+    h1 {
+        font-size: 28px; /* Título un poco más chico */
+        margin-bottom: 30px;
+    }
+
+    .btn-container {
+        grid-template-columns: 1fr; /* 1 sola columna */
+    }
+
+    /* Anulamos la regla del último hijo para que en celular sea igual a los demás */
+    .btn-container a:last-child:nth-child(odd) {
+        grid-column: span 1;
+        width: 100%;
+    }
+}
+
+/* --- FOOTER --- */
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #666666;
+    font-size: 14px;
+    border-top: 1px solid #1f1f1f;
+    background-color: #121212;
+}
