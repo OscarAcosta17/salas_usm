@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcular Promedio - Salas USM</title>
+    <link rel="icon" type="image/png" href="icono.png">
+
+    <style>
+        /* --- ESTILOS GENERALES (Dark Mode) --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- BARRA SUPERIOR --- */
+        .topbar {
+            background-color: #1f1f1f;
+            border-bottom: 1px solid #333;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            width: 100%;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 600;
+            color: #e0e0e0;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        .btn-nav {
+            padding: 6px 14px;
+            font-size: 14px;
+            background-color: #4a4a4a;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            border: 1px solid #5a5a5a;
+            transition: 0.3s;
+        }
+        .btn-nav:hover { background-color: #616161; }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .container {
+            display: flex;
+            flex: 1; 
+            position: relative;
+        }
+
+        /* --- PANEL IZQUIERDO (CONFIGURACIÓN) --- */
+        .left-panel {
+            width: 300px; 
+            min-width: 300px;
+            background-color: #2c2c2c; 
+            border-right: 1px solid #444;
+            padding: 25px;
+            position: sticky;
+            top: 60px; 
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #ccc;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+
+        .config-group { margin-bottom: 20px; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #383838;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+        input[type="number"]:focus { border-color: #3498db; }
+
+        /* Estilo especial para el input de Bonus */
+        .input-bonus {
+            border-color: #f39c12 !important; /* Naranja para destacar */
+            color: #f39c12 !important;
+            font-weight: bold;
+        }
+
+        .btn-generar {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+        .btn-generar:hover { background: #2980b9; }
+
+        /* --- PANEL DERECHO (INPUTS Y RESULTADOS) --- */
+        .right-panel {
+            flex: 1; 
+            padding: 40px;
+            background-color: #121212;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .section-card {
+            background-color: #1e1e1e;
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        /* TOGGLE SWITCH */
+        .mode-switch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: #bbb;
+        }
+        .switch-label { cursor: pointer; }
+        
+        .global-weight-control {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            background: #252525;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        /* GRID DE INPUTS */
+        .grades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .grade-item {
+            background: #252525;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+
+        .grade-item label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .input-row { display: flex; gap: 10px; }
+
+        /* CLASES PARA OCULTAR ELEMENTOS SEGÚN EL MODO */
+        .hidden { display: none !important; }
+        .full-width-input { width: 100% !important; }
+
+        /* Footer de cálculo */
+        .calc-footer {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #2c2c2c;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #444;
+        }
+
+        .btn-calcular {
+            padding: 12px 30px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-calcular:hover { background: #2ecc71; }
+
+        .result-display {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        
+        .result-label { font-size: 13px; color: #aaa; margin-bottom: 5px; }
+
+        .result-value-main {
+            font-size: 36px;
+            font-weight: bold;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .result-value-approx {
+            font-size: 20px;
+            font-weight: 500;
+            color: #888;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <a href="index.html" class="logo">Salas USM</a>
+    <a href="index.html" class="btn-nav">← Volver al menú</a>
+</div>
+
+<div class="container">
+
+    <div class="left-panel">
+        <h2>Configuración</h2>
+
+        <div class="config-group">
+            <label>N° de Certámenes</label>
+            <input type="number" id="num-cert" min="0" max="10" value="2">
+        </div>
+
+        <div class="config-group">
+            <label>N° de Controles</label>
+            <input type="number" id="num-ctrl" min="0" max="20" value="0">
+        </div>
+
+        <div class="config-group">
+            <label>N° de Tareas</label>
+            <input type="number" id="num-tar" min="0" max="20" value="0">
+        </div>
+        
+        <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
+
+        <div class="config-group">
+            <label style="color: #f39c12;">Bonus Final (Multiplicador)</label>
+            <input type="number" id="bonus-factor" class="input-bonus" min="0" step="0.01" value="1" placeholder="Ej: 1.1">
+            <p style="font-size: 11px; color: #888; margin-top: 5px;">
+                1 = Sin cambios. <br> 1.1 = +10% al promedio final.
+            </p>
+        </div>
+
+        <button class="btn-generar" onclick="generarFormulario()">Generar Casillas</button>
+    </div>
+
+    <div class="right-panel">
+        
+        <div id="contenedor-inputs" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <p style="color: #666; font-style: italic;">Configura las cantidades y pulsa "Generar Casillas".</p>
+        </div>
+
+        <div id="barra-calculo" class="calc-footer" style="display: none;">
+            <button class="btn-calcular" onclick="calcularPromedio()">Calcular Promedio</button>
+            <div class="result-display">
+                <div class="result-label">PROMEDIO FINAL</div>
+                <div class="result-value-main" id="val-exacto">--</div>
+                <div class="result-value-approx" id="val-aprox">--</div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    // ==========================================
+    // 1. GENERADOR DE INTERFAZ
+    // ==========================================
+    function generarFormulario() {
+        const nCert = parseInt(document.getElementById('num-cert').value) || 0;
+        const nCtrl = parseInt(document.getElementById('num-ctrl').value) || 0;
+        const nTar  = parseInt(document.getElementById('num-tar').value) || 0;
+
+        const contenedor = document.getElementById('contenedor-inputs');
+        contenedor.innerHTML = ''; 
+
+        if (nCert > 0) crearSeccion(contenedor, "Certámenes", "cert", nCert);
+        if (nCtrl > 0) crearSeccion(contenedor, "Controles", "ctrl", nCtrl);
+        if (nTar > 0)  crearSeccion(contenedor, "Tareas", "tar", nTar);
+
+        const barra = document.getElementById('barra-calculo');
+        if (nCert + nCtrl + nTar > 0) {
+            barra.style.display = 'flex';
+        } else {
+            barra.style.display = 'none';
+            contenedor.innerHTML = '<p style="color: #666;">Selecciona una cantidad mayor a 0.</p>';
+        }
+    }
+
+    function crearSeccion(padre, titulo, idBase, cantidad) {
+        const card = document.createElement('div');
+        card.className = 'section-card';
+        card.setAttribute('data-section-id', idBase); 
+
+        // Header
+        let headerHTML = `
+            <div class="section-header">
+                <div class="section-title">${titulo}</div>
+                <div class="mode-switch">
+                    <label class="switch-label">
+                        <input type="radio" name="mode_${idBase}" value="individual" checked onchange="cambiarModo('${idBase}', 'individual')"> 
+                        Individual %
+                    </label>
+                    <label class="switch-label">
+                        <input type="radio" name="mode_${idBase}" value="global" onchange="cambiarModo('${idBase}', 'global')"> 
+                        Promedio %
+                    </label>
+                </div>
+            </div>
+        `;
+
+        // Peso Global (oculto por defecto)
+        let globalWeightHTML = `
+            <div class="global-weight-control" id="global_weight_${idBase}" style="display:none;">
+                <label style="color: #ddd;">Peso total de ${titulo} en el promedio final:</label>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="number" class="input-global-peso" placeholder="Ej: 30" min="0" max="100">
+                    <span style="color:#aaa;">%</span>
+                </div>
+            </div>
+        `;
+
+        // Grid
+        let gridHTML = `<div class="grades-grid" id="grid_${idBase}">`;
+        for (let i = 1; i <= cantidad; i++) {
+            gridHTML += `
+                <div class="grade-item">
+                    <label>${titulo.slice(0, -1)} ${i}</label>
+                    <div class="input-row">
+                        <input type="number" class="input-nota" placeholder="Nota" min="0" step="0.1">
+                        <input type="number" class="input-peso" placeholder="%" min="0" max="100">
+                    </div>
+                </div>
+            `;
+        }
+        gridHTML += `</div>`;
+        
+        card.innerHTML = headerHTML + globalWeightHTML + gridHTML;
+        padre.appendChild(card);
+    }
+
+    // ==========================================
+    // 2. MANEJO DE MODOS (Switch Individual/Global)
+    // ==========================================
+    function cambiarModo(idBase, modo) {
+        const globalControl = document.getElementById(`global_weight_${idBase}`);
+        const grid = document.getElementById(`grid_${idBase}`);
+        const inputsPeso = grid.querySelectorAll('.input-peso');
+        const inputsNota = grid.querySelectorAll('.input-nota');
+
+        if (modo === 'global') {
+            globalControl.style.display = 'block';
+            inputsPeso.forEach(inp => inp.classList.add('hidden'));
+            inputsNota.forEach(inp => inp.classList.add('full-width-input'));
+        } else {
+            globalControl.style.display = 'none';
+            inputsPeso.forEach(inp => inp.classList.remove('hidden'));
+            inputsNota.forEach(inp => inp.classList.remove('full-width-input'));
+        }
+    }
+
+    // ==========================================
+    // 3. CÁLCULO
+    // ==========================================
+    function calcularPromedio() {
+        const secciones = document.querySelectorAll('.section-card');
+        // Obtener el factor BONUS
+        const bonusFactor = parseFloat(document.getElementById('bonus-factor').value) || 1;
+        
+        let componentesFinales = []; 
+
+        secciones.forEach(sec => {
+            const idBase = sec.getAttribute('data-section-id');
+            const modo = sec.querySelector(`input[name="mode_${idBase}"]:checked`).value;
+            const notasInputs = sec.querySelectorAll('.input-nota');
+            
+            // MODO GLOBAL: Promedio simple de la sección * Peso de la sección
+            if (modo === 'global') {
+                const pesoGlobalInput = sec.querySelector('.input-global-peso');
+                const pesoSeccion = parseFloat(pesoGlobalInput.value) || 0;
+                
+                let suma = 0; 
+                let count = 0;
+                notasInputs.forEach(input => {
+                    const val = parseFloat(input.value);
+                    if (!isNaN(val)) { suma += val; count++; }
+                });
+
+                if (count > 0) {
+                    // Promedio simple dentro de la sección
+                    componentesFinales.push({ nota: suma/count, peso: pesoSeccion });
+                }
+
+            // MODO INDIVIDUAL: Suma ponderada de cada nota
+            } else {
+                const pesosInputs = sec.querySelectorAll('.input-peso');
+                for (let i = 0; i < notasInputs.length; i++) {
+                    const val = parseFloat(notasInputs[i].value);
+                    const peso = parseFloat(pesosInputs[i].value);
+                    if (!isNaN(val) && !isNaN(peso)) {
+                        componentesFinales.push({ nota: val, peso: peso });
+                    }
+                }
+            }
+        });
+
+        // --- CÁLCULO FINAL ---
+        let sumaPonderada = 0;
+        let sumaPesos = 0;
+
+        componentesFinales.forEach(c => {
+            sumaPonderada += c.nota * c.peso;
+            sumaPesos += c.peso;
+        });
+
+        if (sumaPesos === 0) {
+            mostrarResultado("--", "--");
+            return;
+        }
+
+        // 1. Promedio ponderado base
+        let promedioFinal = sumaPonderada / sumaPesos;
+
+        // 2. Aplicar BONUS
+        promedioFinal = promedioFinal * bonusFactor;
+
+        // Visualización
+        const exacto = promedioFinal.toFixed(1); // 1 decimal (ej: 54.5)
+        
+        let aproximado = "";
+        if (promedioFinal > 7.0) {
+            // Escala 0-100 (54.5 -> 55)
+            aproximado = Math.round(promedioFinal).toString();
+        } else {
+            // Escala 1.0-7.0 (3.95 -> 4.0)
+            aproximado = promedioFinal.toFixed(1); 
+        }
+
+        mostrarResultado(exacto, aproximado);
+    }
+
+    function mostrarResultado(exacto, aproximado) {
+        const divExacto = document.getElementById('val-exacto');
+        const divAprox = document.getElementById('val-aprox');
+
+        divExacto.innerText = exacto;
+        divAprox.innerText = (aproximado !== "--") ? `~ ${aproximado}` : "--";
+
+        if (exacto === "--") {
+            divExacto.style.color = "#fff";
+            return;
+        }
+
+        const valNum = parseFloat(exacto);
+        // Color Verde/Rojo según aprobación
+        const color = (valNum >= 54.5 || (valNum >= 3.95 && valNum <= 7.0)) ? "#27ae60" : "#e74c3c";
+        
+        divExacto.style.color = color;
+    }
+
+    window.onload = generarFormulario;
+</script>
+
+</body>
+</html>
