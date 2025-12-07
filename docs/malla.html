@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Malla Interactiva - Salas USM</title>
     <link rel="icon" type="image/png" href="icono.png">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         /* --- ESTILOS GENERALES (Dark Mode) --- */
@@ -48,7 +50,7 @@
             overflow: hidden; 
         }
 
-        /* --- BARRA DE PROGRESO --- */
+        /* --- BARRA DE PROGRESO Y CONTROLES --- */
         .controls-area {
             background-color: #2c2c2c;
             padding: 10px 20px;
@@ -56,7 +58,7 @@
             margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px; /* Espacio entre elementos */
             flex-shrink: 0;
         }
 
@@ -65,10 +67,22 @@
         .progress-bar-bg { background: #444; height: 10px; border-radius: 5px; overflow: hidden; }
         .progress-bar-fill { background: #27ae60; height: 100%; width: 0%; transition: width 0.3s; }
 
+        /* Botón Reset (Rojo) */
         .reset-btn {
-            background: #c0392b; color: white; border: none; padding: 6px 12px;
-            border-radius: 4px; cursor: pointer; font-size: 12px;
+            background: #c0392b; color: white; border: none; padding: 8px 15px;
+            border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;
+            transition: 0.2s;
         }
+        .reset-btn:hover { background: #e74c3c; }
+
+        /* Botón Descarga (Verde - NUEVO) */
+        .download-btn {
+            background: #27ae60; color: white; border: none; padding: 8px 15px;
+            border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;
+            transition: 0.2s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .download-btn:hover { background: #2ecc71; }
 
         /* --- GRID DE LA MALLA --- */
         .malla-wrapper {
@@ -85,6 +99,9 @@
             gap: 6px;
             width: 100%;
             min-width: 1200px;
+            /* Padding extra para que la captura no salga cortada en los bordes */
+            padding: 10px;
+            background-color: #121212; /* Fondo para la imagen */
         }
 
         /* --- CABECERAS --- */
@@ -110,6 +127,7 @@
             background-color: #2c3e50;
             color: #fff;
             text-transform: uppercase;
+            letter-spacing: 1px;
             font-size: 14px;
             margin-bottom: 4px;
         }
@@ -137,7 +155,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             border: 2px solid transparent; 
 
-            /* ESTADO 1: BLOQUEADO (Por defecto: Opaco) */
+            /* ESTADO 1: BLOQUEADO */
             opacity: 0.25;
             filter: grayscale(90%);
             background-color: #333; 
@@ -152,7 +170,7 @@
         .ramo-sigla { font-weight: bold; font-size: 10px; margin-bottom: 3px; opacity: 0.9; }
         .ramo-nombre { font-size: 11px; line-height: 1.1; font-weight: 500;}
 
-        /* ESTADO 2: HABILITADO (Prerrequisitos OK) - COLOR BRILLANTE */
+        /* ESTADO 2: HABILITADO */
         .ramo-card.habilitado {
             opacity: 1 !important;
             filter: grayscale(0%) !important;
@@ -160,12 +178,12 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* ESTADO 3: APROBADO (Check) */
+        /* ESTADO 3: APROBADO */
         .ramo-card.aprobado {
             opacity: 1 !important;
             filter: grayscale(0%) !important;
             border-color: #2ecc71; 
-            
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5); 
         }
         
         .ramo-card.aprobado::after {
@@ -183,40 +201,17 @@
         }
 
         /* --- COLORES PERSONALIZADOS --- */
-        
-        /* 1. Verde Clarito */
-        .bg-verde-claro { 
-            background-color: #7fd023; 
-            color: #000 !important; 
-            font-weight: 600;
-        }
-        
-        /* 2. Rosado */
+        .bg-verde-claro { background-color: #9ccc65; color: #000 !important; font-weight: 600; }
         .bg-rosado { background-color: #d81b60; } 
-
-        /* 3. Rojo Oscuro */
         .bg-rojo-oscuro { background-color: #8b0000; } 
-
-        /* 4. Verde Oscuro */
-        .bg-verde-oscuro { background-color: #105d15; } 
-
-        /* 5. Azul Oscuro */
+        .bg-verde-oscuro { background-color: #1b5e20; } 
         .bg-azul-oscuro { background-color: #0d47a1; } 
-
-        /* 6. Amarillo */
-        .bg-amarillo { 
-            background-color: #fbc02d; 
-            color: #000 !important; 
-            font-weight: 600;
-        }
-
-        /* 7. Celeste */
+        .bg-amarillo { background-color: #fbc02d; color: #000 !important; font-weight: 600; }
         .bg-celeste { background-color: #0288d1; } 
-
-        /* Colores Auxiliares */
-        .bg-plan-comun { background-color: #008080; } /* Teal */
-        .bg-infra { background-color: #6c3483; }      /* Morado */
-        .bg-electivo { background-color: #e67e22; }    /* Naranja */
+        
+        .bg-plan-comun { background-color: #008080; } 
+        .bg-infra { background-color: #6c3483; }      
+        .bg-electivo { background-color: #e67e22; }    
 
         /* LEYENDA */
         .legend {
@@ -256,7 +251,10 @@
                     <div class="progress-bar-fill" id="progress-fill"></div>
                 </div>
             </div>
-            <button class="reset-btn" onclick="resetMalla()">Reset</button>
+            
+            <button class="download-btn" onclick="descargarMalla()">Guardar Progreso</button>
+            
+            <button class="reset-btn" onclick="resetMalla()">Reiniciar</button>
         </div>
 
         <div class="malla-wrapper">
@@ -280,53 +278,31 @@
 
     <script>
         // ============================================
-        // LÓGICA DE COLORES Y TIPOS
+        // LÓGICA DE DATOS
         // ============================================
         function getTipo(sigla) {
-            // 1. Verde Clarito: Humanistas, Deportes y Libres
-            // Cuidado con INF-134 que empieza con INF-1
             if (sigla.startsWith('HRW') || sigla.startsWith('DEW') || sigla.includes('Libre') || 
-               (sigla.startsWith('INF-') && parseInt(sigla.split('-')[1]) < 10)) { // Libres INF-1 a INF-7
+               (sigla.startsWith('INF-') && parseInt(sigla.split('-')[1]) < 10)) { 
                 return 'verde-claro';
             }
-
-            // 2. Rosado
             const rosados = ['IWG-101', 'INF-228', 'INF-276', 'INF-309', 'INF-310'];
             if (rosados.includes(sigla)) return 'rosado';
-
-            // 3. Rojo Oscuro
             const rojosOscuros = ['INF-260', 'INF-270', 'INF-292', 'INF-293', 'INF-266', 'INF-360'];
             if (rojosOscuros.includes(sigla)) return 'rojo-oscuro';
-
-            // 4. Verde Oscuro
             const verdesOscuros = ['INF-280', 'INF-285', 'INF-295'];
             if (verdesOscuros.includes(sigla)) return 'verde-oscuro';
-
-            // 5. Azul Oscuro
             const azulesOscuros = ['IWI-131', 'INF-134', 'INF-253', 'INF-152', 'INF-155', 'INF-221'];
             if (azulesOscuros.includes(sigla)) return 'azul-oscuro';
-
-            // 6. Amarillos
             const amarillos = ['INF-239', 'INF-236', 'INF-225', 'INF-322'];
             if (amarillos.includes(sigla)) return 'amarillo';
-
-            // 7. Celestes
             const celestes = ['IWN-170', 'ICN-270'];
             if (celestes.includes(sigla)) return 'celeste';
-
-            // --- OTROS (Por defecto) ---
             if (sigla.startsWith('MAT') || sigla.startsWith('FIS') || sigla.startsWith('QUI')) return 'plan-comun';
-            
             if (['INF-245', 'INF-246', 'INF-256', 'INF-343'].includes(sigla)) return 'infra';
-
             if (sigla.includes('Electivo') || sigla.includes('305') || sigla.includes('306') || sigla.includes('307') || sigla.includes('308') || sigla.includes('311') || sigla.includes('312') || sigla.includes('313') || sigla.includes('314')) return 'electivo';
-
             return 'azul-oscuro'; 
         }
 
-        // ============================================
-        // DATA DE RAMOS
-        // ============================================
         const RAMOS_DATA = [
             // SEM 1
             { sigla: 'IWI-131', nombre: 'Programacion', sem: 1, prereqs: [] },
@@ -406,27 +382,22 @@
             const grid = document.getElementById('malla-grid');
             grid.innerHTML = '';
 
-            // --- FILA 1: AÑOS ---
             for (let i = 1; i <= 6; i++) {
                 const yearHeader = document.createElement('div');
                 yearHeader.className = `header-cell year-header ${i===6 ? 'last-year' : ''}`;
                 yearHeader.innerText = `AÑO ${i}`;
-                yearHeader.title = `Marcar Año ${i}`;
                 yearHeader.onclick = () => toggleAnio(i);
                 grid.appendChild(yearHeader);
             }
 
-            // --- FILA 2: SEMESTRES ---
             for (let i = 1; i <= 11; i++) {
                 const semHeader = document.createElement('div');
                 semHeader.className = 'header-cell semestre-header';
                 semHeader.innerText = numeroRomano(i);
-                semHeader.title = `Marcar Semestre ${i}`;
                 semHeader.onclick = () => toggleSemestre(i);
                 grid.appendChild(semHeader);
             }
 
-            // --- FILA 3: RAMOS ---
             for (let i = 1; i <= 11; i++) {
                 const colStack = document.createElement('div');
                 colStack.className = 'col-stack';
@@ -438,7 +409,6 @@
                     card.className = `ramo-card bg-${tipo}`;
                     card.id = `card-${ramo.sigla}`;
 
-                    // LÓGICA DE ESTADOS
                     const isAprobado = aprobados.includes(ramo.sigla);
                     const prereqsCumplidos = ramo.prereqs.every(p => aprobados.includes(p));
 
@@ -474,13 +444,12 @@
                 aprobados.push(sigla);
             }
             guardar();
-            renderMalla(); // Re-render completo
+            renderMalla(); 
         }
 
         function toggleSemestre(semNum) {
             const ramosSem = RAMOS_DATA.filter(r => r.sem === semNum);
             const todosAprobados = ramosSem.every(r => aprobados.includes(r.sigla));
-
             if (todosAprobados) {
                 ramosSem.forEach(r => aprobados = aprobados.filter(s => s !== r.sigla));
             } else {
@@ -495,7 +464,6 @@
             const semFin = (anioNum === 6) ? 11 : semInicio + 1;
             const ramosAnio = RAMOS_DATA.filter(r => r.sem >= semInicio && r.sem <= semFin);
             const todosAprobados = ramosAnio.every(r => aprobados.includes(r.sigla));
-
             if (todosAprobados) {
                 ramosAnio.forEach(r => aprobados = aprobados.filter(s => s !== r.sigla));
             } else {
@@ -505,7 +473,6 @@
             renderMalla();
         }
 
-        // --- AUXILIARES ---
         function highlightPrereqs(prereqs) {
             if (!prereqs) return;
             prereqs.forEach(sigla => {
@@ -536,6 +503,23 @@
                 guardar();
                 renderMalla();
             }
+        }
+
+        // --- NUEVA FUNCIÓN: DESCARGAR IMAGEN ---
+        function descargarMalla() {
+            const element = document.getElementById('malla-grid');
+            
+            // Usamos html2canvas
+            html2canvas(element, {
+                backgroundColor: "#121212", // Fondo oscuro para que coincida
+                scale: 2 // Mejor calidad
+            }).then(canvas => {
+                // Crear link fantasma
+                const link = document.createElement('a');
+                link.download = 'mi_avance_malla.png';
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
         }
 
         function numeroRomano(num) {
