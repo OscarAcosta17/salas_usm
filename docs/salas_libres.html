@@ -220,8 +220,28 @@
         return null; 
     }
 
+    // --- NUEVO: Función para limpiar nombres de salas (Normalizar) ---
+    function normalizarNombreSala(nombre) {
+        if (!nombre) return "";
+        // 1. Quitar espacios al inicio/final
+        let limpio = nombre.trim();
+        // 2. Unificar guiones con espacios: "A001 - SJ" -> "A001-SJ"
+        limpio = limpio.replace(/\s*-\s*/g, "-");
+        return limpio;
+    }
+
+    // --- NUEVO: Validar si es una sala real o basura ---
+    function esSalaValida(nombre) {
+        if (!nombre) return false;
+        // Si tiene ":" seguro es una hora, no una sala
+        if (nombre.includes(":")) return false; 
+        // Si es muy largo, probablemente sea basura
+        if (nombre.length > 15) return false;
+        return true;
+    }
+
     // ============================================
-    // LÓGICA PRINCIPAL CORREGIDA
+    // LÓGICA PRINCIPAL
     // ============================================
     function buscarSalasLibres() {
         const diaInput = document.getElementById("filtro-dia-libre").value;
@@ -241,24 +261,30 @@
             return;
         }
 
-        // ----------------------------------------------------
-        // CORRECCIÓN AQUÍ: FILTRADO DE DATOS "SUCIOS"
-        // ----------------------------------------------------
-        // 1. Obtenemos todas las salas, pero FILTRAMOS las que parecen horas.
-        // Si el nombre contiene ":" (ej: 14:40) lo ignoramos.
-        const todasLasSalas = [...new Set(
-            datos
-                .map(d => d.SALA)
-                .filter(s => s && !s.includes(":") && s.length < 15) 
-        )].sort();
+        // 1. Obtener LISTA MAESTRA de salas (Normalizada y Única)
+        const masterSalas = new Set();
+        
+        datos.forEach(d => {
+            if (esSalaValida(d.SALA)) {
+                masterSalas.add(normalizarNombreSala(d.SALA));
+            }
+        });
+        
+        // Convertir Set a Array ordenado
+        const todasLasSalas = [...masterSalas].sort();
 
-        // 2. Identificar ocupadas
+        // 2. Identificar ocupadas (Normalizando también al buscar)
         const salasOcupadas = new Set();
+        
         datos.forEach(ramo => {
             if (ramo.DIA === diaInput) {
                 const bloqueRamo = horaInicioABloqueBase(ramo.HORA);
                 if (bloqueRamo === infoBloque.par) {
-                    salasOcupadas.add(ramo.SALA);
+                    // Importante: Normalizar antes de agregar a ocupadas
+                    // para que "A001- SJ" coincida con "A001-SJ"
+                    if (esSalaValida(ramo.SALA)) {
+                        salasOcupadas.add(normalizarNombreSala(ramo.SALA));
+                    }
                 }
             }
         });
@@ -266,7 +292,7 @@
         // 3. Filtrar libres
         const salasLibres = todasLasSalas.filter(sala => !salasOcupadas.has(sala));
 
-        // 4. Mostrar
+        // 4. Mostrar resultados
         if (salasLibres.length === 0) {
             lista.innerHTML = '<li class="empty-msg">No hay salas libres en este horario.</li>';
         } else {
@@ -284,6 +310,5 @@
     document.getElementById("filtro-dia-libre").addEventListener("change", buscarSalasLibres);
     document.getElementById("filtro-bloque-libre").addEventListener("input", buscarSalasLibres);
 </script>
-
 </body>
 </html>
