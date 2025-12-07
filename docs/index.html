@@ -19,13 +19,11 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #121212; /* Negro Mate */
             color: #ffffff;
-            /* Configuración Flex para centrar el bloque y bajar el footer */
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
 
-        /* Contenedor principal que empuja el footer hacia abajo */
         .main-container {
             flex: 1;
             display: flex;
@@ -52,23 +50,40 @@
             letter-spacing: 1px;
         }
 
+        /* --- AQUÍ ESTÁ EL CAMBIO PARA LA SIMETRÍA --- */
         .btn-container {
-            display: flex;
-            justify-content: center;
+            display: grid; 
+            /* Crea 2 columnas de igual tamaño (1 fracción cada una) */
+            grid-template-columns: 1fr 1fr; 
             gap: 20px;
-            flex-wrap: wrap;
+            /* Limitamos el ancho para que los botones no se vean gigantes */
+            max-width: 600px; 
+            margin: 0 auto; /* Centramos la rejilla */
+        }
+
+        /* Para pantallas muy pequeñas (celulares), que se pongan en 1 sola columna */
+        @media (max-width: 500px) {
+            .btn-container {
+                grid-template-columns: 1fr;
+            }
         }
 
         .btn-nav {
-            padding: 15px 30px;
+            padding: 15px 10px; /* Reduje un poco el padding lateral */
             font-size: 18px;
-            background-color: #4a4a4a; /* Gris Claro */
+            background-color: #4a4a4a; 
             color: #ffffff;
             text-decoration: none;
             border-radius: 8px;
-            
             transition: all 0.3s ease;
             font-weight: 500;
+            
+            /* Asegura que el botón llene su espacio en la rejilla y centre el texto */
+            width: 100%; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
         }
 
         .btn-nav:hover {
@@ -77,13 +92,12 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
-        /* Estilos del Footer (Copyright) */
         footer {
             text-align: center;
             padding: 20px;
-            color: #666666; /* Un gris tenue para que no distraiga */
+            color: #666666;
             font-size: 14px;
-            border-top: 1px solid #1f1f1f; /* Una línea muy sutil arriba */
+            border-top: 1px solid #1f1f1f;
             background-color: #121212;
         }
     </style>
