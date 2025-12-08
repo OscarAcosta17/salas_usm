@@ -3,7 +3,6 @@ import json
 import os
 import re
 
-# Mapeo para expandir las abreviaciones del PDF
 TIPO_ASIGNATURA = {
     "Cát": "Cátedra",
     "Ayud": "Ayudantía",
@@ -37,8 +36,6 @@ def extraer_horarios(pdf_path, json_output_path):
         return
 
     datos_finales = []
-
-    # Variables para mantener el estado de la asignatura actual (relleno hacia abajo)
     current_info = {
         "SIGLA": "",
         "NOMBRE": "",
@@ -56,27 +53,20 @@ def extraer_horarios(pdf_path, json_output_path):
                 continue
 
             for row in table:
-                # Limpieza básica de la primera celda para detectar si es cabecera o dato
                 col_0 = limpiar_texto(row[0])
-
-                # 1. Detectar cabeceras principales y saltarlas
                 if "Sigla" in col_0 or "Asignatura" in col_0:
                     continue
                 
-                # 2. Actualizar datos de la asignatura si la fila tiene Sigla
                 if col_0:
                     current_info["SIGLA"] = col_0
                     current_info["NOMBRE"] = limpiar_texto(row[1])
                     current_info["DEPTO"] = limpiar_texto(row[2])
                     current_info["PARALELO"] = limpiar_texto(row[3])
                     current_info["PROFESOR"] = limpiar_texto(row[4])
-                
-                # 3. Extraer datos del horario
+
                 try:
                     dia_raw = limpiar_texto(row[6])
-                    
-                    # --- CORRECCIÓN AQUÍ ---
-                    # Filtro robusto para eliminar filas de encabezados o basura
+
                     if (not dia_raw or 
                         "Día" in dia_raw or 
                         "Dia" in dia_raw or 
@@ -87,11 +77,9 @@ def extraer_horarios(pdf_path, json_output_path):
                     tipo_raw = limpiar_texto(row[9])
                     sala_raw = limpiar_texto(row[10])
 
-                    # Si no hay hora, generalmente es una fila inválida que se coló
                     if not hora_raw:
                         continue
 
-                    # Formateos
                     hora_fmt = formatear_hora(hora_raw)
                     tipo_fmt = TIPO_ASIGNATURA.get(tipo_raw.split('.')[0], tipo_raw)
 
@@ -107,13 +95,11 @@ def extraer_horarios(pdf_path, json_output_path):
                         "ASIG": tipo_fmt
                     }
 
-                    # Guardamos solo si hay datos esenciales
                     datos_finales.append(clase)
 
                 except IndexError:
                     continue
 
-    # Guardar
     os.makedirs(os.path.dirname(json_output_path), exist_ok=True)
     
     with open(json_output_path, 'w', encoding='utf-8') as f:
@@ -123,8 +109,7 @@ def extraer_horarios(pdf_path, json_output_path):
 
 if __name__ == "__main__":
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # Rutas según tu estructura
+
     ruta_pdf = os.path.join(base_dir, '..', 'pdf', 'horario.pdf')
     ruta_json = os.path.join(base_dir, '..', 'docs', 'data', 'salas.json')
 

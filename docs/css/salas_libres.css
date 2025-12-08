@@ -1,6 +1,3 @@
-/* css/salas_libres.css */
-
-/* --- RESET BÁSICO --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -12,12 +9,12 @@ body {
     min-height: 100vh;
 }
 
-/* --- CONTENEDOR PRINCIPAL (Centrado) --- */
+/* --- CONTENEDOR PRINCIPAL  --- */
 .main-container {
     flex: 1;
     display: flex;
     justify-content: center;
-    align-items: center; /* Centra verticalmente */
+    align-items: center;
     padding: 40px 20px;
     width: 100%;
 }
@@ -54,7 +51,7 @@ h1 { font-size: 28px; color: #e0e0e0; font-weight: 600; }
     border-radius: 8px;
     border: 1px solid #5a5a5a;
     transition: 0.3s;
-    white-space: nowrap; /* Evita que el texto se rompa */
+    white-space: nowrap; 
 }
 .btn-nav:hover { background-color: #616161; }
 
@@ -64,7 +61,6 @@ h1 { font-size: 28px; color: #e0e0e0; font-weight: 600; }
     gap: 20px;
     justify-content: center;
     margin-bottom: 30px;
-    /* Importante para responsive: permite que bajen si no caben */
     flex-wrap: wrap; 
 }
 
@@ -73,10 +69,14 @@ h1 { font-size: 28px; color: #e0e0e0; font-weight: 600; }
     flex-direction: column;
     text-align: left;
     flex: 1;
-    min-width: 200px; /* Ancho mínimo para que no se aplaste */
+    min-width: 200px;
 }
 
-label { margin-bottom: 8px; font-size: 14px; color: #aaa; }
+label { 
+    margin-bottom: 8px; 
+    font-size: 14px; 
+    color: #aaa; 
+}
 
 select, input {
     padding: 12px;
@@ -98,7 +98,7 @@ ul {
     padding: 0;
     margin: 0;
     max-height: 400px;
-    overflow-y: auto; /* Scroll interno si la lista es muy larga */
+    overflow-y: auto;
 }
 
 li {
@@ -106,7 +106,7 @@ li {
     margin-bottom: 10px;
     padding: 15px 20px;
     border-radius: 8px;
-    border-left: 5px solid #27ae60; /* Borde verde indicando "Libre" */
+    border-left: 5px solid #27ae60;
     transition: transform 0.2s, background-color 0.2s;
     display: flex;
     justify-content: space-between;
@@ -140,7 +140,6 @@ li:hover {
     padding: 20px;
 }
 
-/* Scrollbar personalizada para la lista */
 ul::-webkit-scrollbar { width: 8px; }
 ul::-webkit-scrollbar-track { background: #2c2c2c; }
 ul::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
@@ -152,24 +151,22 @@ footer {
     color: #666;
     font-size: 14px;
     border-top: 1px solid #1f1f1f;
-    margin-top: auto; /* Empuja el footer al fondo si hay poco contenido */
+    margin-top: auto; 
 }
 
-/* =========================================
-   DISEÑO RESPONSIVO (CELULARES)
-   ========================================= */
+
 @media (max-width: 600px) {
     .main-container {
-        padding: 20px 10px; /* Menos padding lateral */
-        align-items: flex-start; /* Subir el contenido un poco */
+        padding: 20px 10px;
+        align-items: flex-start; 
     }
 
     .bloque {
-        padding: 25px 20px; /* Bloque más compacto */
+        padding: 25px 20px; 
     }
 
     .header-top {
-        flex-direction: column; /* Título arriba, botón abajo */
+        flex-direction: column;
         gap: 15px;
         text-align: center;
     }
@@ -179,7 +176,7 @@ footer {
     }
 
     .btn-nav {
-        width: 100%; /* Botón ancho fácil de tocar */
+        width: 100%;
         text-align: center;
     }
 
@@ -190,17 +187,15 @@ footer {
     }
 
     .input-group {
-        width: 100%; /* Ocupar todo el ancho */
+        width: 100%; 
     }
 
-    /* Inputs tamaño 16px para evitar Zoom en iOS */
     select, input {
         font-size: 16px; 
     }
 
-    /* Ajuste de items de la lista */
     li {
-        flex-direction: column; /* Nombre arriba, horario abajo */
+        flex-direction: column;
         align-items: flex-start;
         gap: 5px;
     }

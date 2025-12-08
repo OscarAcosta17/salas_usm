@@ -1,6 +1,3 @@
-/* estilos_index.css */
-
-/* --- RESET BÁSICO --- */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -9,7 +6,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #121212; /* Negro Mate */
+    background-color: #121212;
     color: #ffffff;
     display: flex;
     flex-direction: column;
@@ -23,17 +20,17 @@ body {
     justify-content: center;
     align-items: center;
     width: 100%;
-    padding: 20px; /* Agregado padding para que no pegue en bordes de celular */
+    padding: 20px;
 }
 
 .bloque {
-    background-color: #2c2c2c; /* Gris Opaco */
+    background-color: #2c2c2c;
     padding: 50px;
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     text-align: center;
     max-width: 800px;
-    width: 100%; /* Ocupa el ancho disponible */
+    width: 100%;
 }
 
 h1 {
@@ -44,10 +41,10 @@ h1 {
     letter-spacing: 1px;
 }
 
-/* --- BOTONES (GRID SYSTEM) --- */
+/* --- BOTONES --- */
 .btn-container {
     display: grid; 
-    grid-template-columns: 1fr 1fr; /* 2 Columnas en PC */
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
     max-width: 600px; 
     margin: 0 auto; 
@@ -67,47 +64,42 @@ h1 {
     justify-content: center;
     align-items: center;
     text-align: center;
-    border: 1px solid #5a5a5a; /* Borde sutil para definición */
+    border: 1px solid #5a5a5a;
 }
 
 .btn-nav:hover {
-    background-color: #3498db; /* Azul al pasar el mouse (mejor feedback) */
+    background-color: #3498db;
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     border-color: #3498db;
 }
 
-/* --- RESPONSIVE DESIGN (CELULAR) --- */
-/* Regla especial para centrar el último botón impar en PC */
 .btn-container a:last-child:nth-child(odd) {
     grid-column: span 2; 
     width: 60%; 
     margin: 0 auto; 
 }
 
-/* Ajustes para pantallas menores a 600px (Celulares) */
 @media (max-width: 600px) {
     .bloque {
-        padding: 30px 20px; /* Menos relleno interno en celular */
+        padding: 30px 20px;
     }
 
     h1 {
-        font-size: 28px; /* Título un poco más chico */
+        font-size: 28px;
         margin-bottom: 30px;
     }
 
     .btn-container {
-        grid-template-columns: 1fr; /* 1 sola columna */
+        grid-template-columns: 1fr;
     }
 
-    /* Anulamos la regla del último hijo para que en celular sea igual a los demás */
     .btn-container a:last-child:nth-child(odd) {
         grid-column: span 1;
         width: 100%;
     }
 }
 
-/* --- FOOTER --- */
 footer {
     text-align: center;
     padding: 20px;

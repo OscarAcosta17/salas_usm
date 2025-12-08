@@ -1,0 +1,296 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.topbar {
+    background-color: #1f1f1f;
+    border-bottom: 1px solid #333;
+    padding: 0 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
+    flex-shrink: 0;
+}
+
+.logo { 
+    font-size: 20px; 
+    font-weight: 600; 
+    color: #e0e0e0; 
+    text-decoration: none; 
+}
+.btn-nav {
+    padding: 5px 12px; 
+    font-size: 13px; 
+    background-color: #4a4a4a;
+    color: #ffffff; 
+    text-decoration: none; 
+    border-radius: 6px;
+    border: 1px solid #5a5a5a; 
+    transition: 0.3s;
+}
+.btn-nav:hover { background-color: #616161; }
+
+/* --- CONTENEDOR PRINCIPAL --- */
+.container {
+    flex: 1;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+}
+
+/* --- BARRA DE PROGRESO Y CONTROLES --- */
+.controls-area {
+    background-color: #2c2c2c;
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+.progress-wrapper { flex: 1; }
+.progress-text { 
+    margin-bottom: 4px; 
+    color: #ccc; 
+    font-size: 13px; 
+    display: flex; 
+    justify-content: space-between;
+}
+.progress-bar-bg { 
+    background: #444; 
+    height: 10px; 
+    border-radius: 5px; 
+    overflow: hidden; 
+}
+.progress-bar-fill { 
+    background: #27ae60; 
+    height: 100%; 
+    width: 0%; 
+    transition: width 0.3s; 
+}
+
+/* Botón Reset (Rojo) */
+.reset-btn {
+    background: #c0392b; 
+    color: white; 
+    border: none; 
+    padding: 8px 15px;
+    border-radius: 4px; 
+    cursor: pointer; 
+    font-size: 12px; 
+    font-weight: 600;
+    transition: 0.2s;
+}
+.reset-btn:hover { background: #e74c3c; }
+
+/* Botón Descarga (Verde - NUEVO) */
+.download-btn {
+    background: #27ae60; 
+    color: white; 
+    border: none; 
+    padding: 8px 15px;
+    border-radius: 4px; 
+    cursor: pointer; 
+    font-size: 12px; 
+    font-weight: 600;
+    transition: 0.2s;
+    display: flex; 
+    align-items: center; 
+    gap: 5px;
+}
+.download-btn:hover { background: #2ecc71; }
+
+/* --- GRID DE LA MALLA --- */
+.malla-wrapper {
+    flex: 1;
+    overflow: auto;
+    padding-bottom: 20px;
+    scrollbar-width: thin;
+    scrollbar-color: #555 #1e1e1e;
+}
+
+.malla-grid {
+    display: grid;
+    grid-template-columns: repeat(11, minmax(110px, 1fr)); 
+    gap: 6px;
+    width: 100%;
+    min-width: 1200px;
+    padding: 10px;
+    background-color: #121212;
+}
+
+/* --- CABECERAS --- */
+.header-cell {
+    color: #ddd;
+    text-align: center;
+    padding: 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+    user-select: none;
+    border: 1px solid #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.header-cell:hover { 
+    background-color: #444; 
+    color: #fff; 
+    border-color: #666; 
+}
+
+.year-header {
+    grid-column: span 2;
+    background-color: #2c3e50;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+.year-header.last-year { grid-column: span 1; }
+
+.semestre-header { 
+    background-color: #222; 
+    color: #aaa; 
+    margin-bottom: 8px; 
+}
+
+.col-stack { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 6px; 
+}
+
+/* --- TARJETA RAMO --- */
+.ramo-card {
+    height: 90px;
+    padding: 5px;
+    border-radius: 5px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 12px;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border: 2px solid transparent; 
+
+    opacity: 0.25;
+    filter: grayscale(90%);
+    background-color: #333; 
+}
+
+.ramo-card:hover { 
+    transform: scale(1.05); 
+    z-index: 20; 
+    opacity: 0.8 !important; 
+}
+
+.ramo-sigla { 
+    font-weight: bold; 
+    font-size: 10px; 
+    margin-bottom: 3px; 
+    opacity: 0.9; 
+}
+.ramo-nombre { 
+    font-size: 11px; 
+    line-height: 1.1; 
+    font-weight: 500;
+}
+
+/* ESTADO 2: HABILITADO */
+.ramo-card.habilitado {
+    opacity: 1 !important;
+    filter: grayscale(0%) !important;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ESTADO 3: APROBADO */
+.ramo-card.aprobado {
+    opacity: 1 !important;
+    filter: grayscale(0%) !important;
+    border-color: #2ecc71; 
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5); 
+}
+
+.ramo-card.aprobado::after {
+    content: "✔"; 
+    position: absolute; 
+    top: 2px; 
+    right: 4px; 
+    font-size: 14px; 
+    color: #2ecc71; 
+    text-shadow: 0 0 2px #000; 
+    background: rgba(0,0,0,0.5); 
+    border-radius: 50%;
+    width: 16px; 
+    height: 16px; 
+    line-height: 16px; 
+    display: block;
+}
+
+.ramo-card.is-prereq {
+    border-color: #f1c40f !important; 
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
+    opacity: 1 !important; 
+    filter: grayscale(0%) !important;
+    z-index: 15;
+}
+
+/* --- COLORES PERSONALIZADOS --- */
+.bg-verde-claro { background-color: #9ccc65; color: #000 !important; font-weight: 600; }
+.bg-rosado { background-color: #d81b60; } 
+.bg-rojo-oscuro { background-color: #8b0000; } 
+.bg-verde-oscuro { background-color: #1b5e20; } 
+.bg-azul-oscuro { background-color: #0d47a1; } 
+.bg-amarillo { background-color: #fbc02d; color: #000 !important; font-weight: 600; }
+.bg-celeste { background-color: #0288d1; } 
+
+.bg-plan-comun { background-color: #008080; } 
+.bg-infra { background-color: #6c3483; }      
+.bg-electivo { background-color: #e67e22; }    
+
+.legend {
+    margin-top: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    background: #222;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    flex-shrink: 0;
+}
+.legend-item { 
+    display: flex; 
+    align-items: center; 
+    gap: 5px; 
+    color: #ccc; 
+}
+.legend-color { 
+    width: 10px; 
+    height: 10px; 
+    border-radius: 2px; 
+    border: 1px solid #555; 
+}

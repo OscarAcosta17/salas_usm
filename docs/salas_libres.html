@@ -46,9 +46,7 @@
     </footer>
 
 <script>
-    // ============================================
     // CONFIGURACIÓN DE BLOQUES
-    // ============================================
     const INFO_BLOQUES = {
         1:  { texto: "Bloque 1-2 (08:15 - 09:25)", par: 1 },
         2:  { texto: "Bloque 1-2 (08:15 - 09:25)", par: 1 },
@@ -69,21 +67,17 @@
     };
 
     let datos = [];
-
-    // Cargar Datos
     fetch("data/salas.json")
         .then(r => r.json())
         .then(json => { datos = json; })
         .catch(err => console.error("Error cargando JSON:", err));
 
-    // Función auxiliar para saber en qué bloque cae una hora
     function horaInicioABloqueBase(horaStr) {
         if (!horaStr) return null;
         const inicio = horaStr.split("-")[0].trim();
         const [h, m] = inicio.split(":").map(Number);
         const minutos = h * 60 + m;
 
-        // Tolerancia de tiempos para detectar el bloque
         if (minutos >= 480 && minutos < 570) return 1;
         if (minutos >= 570 && minutos < 660) return 3;
         if (minutos >= 660 && minutos < 740) return 5;
@@ -95,29 +89,21 @@
         return null; 
     }
 
-    // --- NUEVO: Función para limpiar nombres de salas (Normalizar) ---
     function normalizarNombreSala(nombre) {
         if (!nombre) return "";
-        // 1. Quitar espacios al inicio/final
         let limpio = nombre.trim();
-        // 2. Unificar guiones con espacios: "A001 - SJ" -> "A001-SJ"
         limpio = limpio.replace(/\s*-\s*/g, "-");
         return limpio;
     }
 
-    // --- NUEVO: Validar si es una sala real o basura ---
     function esSalaValida(nombre) {
         if (!nombre) return false;
-        // Si tiene ":" seguro es una hora, no una sala
         if (nombre.includes(":")) return false; 
-        // Si es muy largo, probablemente sea basura
         if (nombre.length > 15) return false;
         return true;
     }
 
-    // ============================================
     // LÓGICA PRINCIPAL
-    // ============================================
     function buscarSalasLibres() {
         const diaInput = document.getElementById("filtro-dia-libre").value;
         const bloqueInput = parseInt(document.getElementById("filtro-bloque-libre").value);
@@ -136,27 +122,20 @@
             return;
         }
 
-        // 1. Obtener LISTA MAESTRA de salas (Normalizada y Única)
         const masterSalas = new Set();
-        
         datos.forEach(d => {
             if (esSalaValida(d.SALA)) {
                 masterSalas.add(normalizarNombreSala(d.SALA));
             }
         });
         
-        // Convertir Set a Array ordenado
         const todasLasSalas = [...masterSalas].sort();
-
-        // 2. Identificar ocupadas (Normalizando también al buscar)
         const salasOcupadas = new Set();
-        
         datos.forEach(ramo => {
             if (ramo.DIA === diaInput) {
                 const bloqueRamo = horaInicioABloqueBase(ramo.HORA);
                 if (bloqueRamo === infoBloque.par) {
-                    // Importante: Normalizar antes de agregar a ocupadas
-                    // para que "A001- SJ" coincida con "A001-SJ"
+            
                     if (esSalaValida(ramo.SALA)) {
                         salasOcupadas.add(normalizarNombreSala(ramo.SALA));
                     }
@@ -164,10 +143,7 @@
             }
         });
 
-        // 3. Filtrar libres
         const salasLibres = todasLasSalas.filter(sala => !salasOcupadas.has(sala));
-
-        // 4. Mostrar resultados
         if (salasLibres.length === 0) {
             lista.innerHTML = '<li class="empty-msg">No hay salas libres en este horario.</li>';
         } else {

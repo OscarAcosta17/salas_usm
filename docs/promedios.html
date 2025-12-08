@@ -82,16 +82,12 @@
         });
     }
 
-    // Toggle interno del bloque amarillo (Input de nota)
     function toggleInnerReq(checkbox) {
-        // Buscar el contenedor de input que es hermano del label padre del checkbox
-        // Estructura: Checkbox -> Label -> Div.req-warning-block -> buscar .req-input-container
         const parentBlock = checkbox.closest('.req-warning-block');
         const inputContainer = parentBlock.querySelector('.req-input-container');
         inputContainer.style.display = checkbox.checked ? 'flex' : 'none';
     }
 
-    // 2. Generar Formulario
     function generarFormulario() {
         const nCert = parseInt(document.getElementById('num-cert').value) || 0;
         const nCtrl = parseInt(document.getElementById('num-ctrl').value) || 0;
@@ -104,12 +100,10 @@
         if (nCtrl > 0) crearSeccion(contenedor, "Controles", "ctrl", nCtrl);
         if (nTar > 0)  crearSeccion(contenedor, "Tareas", "tar", nTar);
 
-        // Resetear visualización
         const barra = document.getElementById('barra-calculo');
         if (nCert + nCtrl + nTar > 0) {
             barra.style.display = 'flex';
             resetResultados();
-            // Aplicar estado actual del checkbox master
             toggleMasterReq(); 
         } else {
             barra.style.display = 'none';
@@ -193,7 +187,6 @@
         document.getElementById('fail-msg').style.display = "none";
     }
 
-    // 3. CALCULO PRINCIPAL
     function calcularPromedio() {
         const secciones = document.querySelectorAll('.section-card');
         const bonusFactor = parseFloat(document.getElementById('bonus-factor').value) || 1;
@@ -201,7 +194,7 @@
 
         let sumaPonderada = 0;
         let sumaPesos = 0;
-        let failReason = null; // Guardará el nombre de la sección que causó reprobación
+        let failReason = null;
 
         secciones.forEach(sec => {
             const idBase = sec.getAttribute('data-section-id');
@@ -209,12 +202,10 @@
             const modo = sec.querySelector(`input[name="mode_${idBase}"]:checked`).value;
             const notasInputs = sec.querySelectorAll('.input-nota');
             
-            // --- CÁLCULO PROMEDIO SECCIÓN ---
             let promSeccion = 0;
             let pesoSeccion = 0;
 
             if (modo === 'global') {
-                // Modo Promedio Simple (todas valen lo mismo internamente)
                 pesoSeccion = parseFloat(sec.querySelector('.input-global-peso').value) || 0;
                 let s = 0, c = 0;
                 notasInputs.forEach(i => {
@@ -224,9 +215,9 @@
                 if (c > 0) promSeccion = s / c;
 
             } else {
-                // Modo Ponderado Individual
                 const pesosInputs = sec.querySelectorAll('.input-peso');
                 let sP = 0, sW = 0;
+
                 for(let i=0; i<notasInputs.length; i++){
                     const v = parseFloat(notasInputs[i].value);
                     const w = parseFloat(pesosInputs[i].value);
@@ -234,19 +225,18 @@
                 }
                 if(sW > 0) {
                     promSeccion = sP / sW;
-                    pesoSeccion = sW; // Si es modo individual, el peso al global es la suma de los pesos internos
+                    pesoSeccion = sW;
                 }
             }
 
-            // --- LÓGICA DE REQUISITO (LLAVE) ---
-            // Solo verificamos si el Master Check está activo Y el checkbox interno está activo
             if (masterReqActive) {
                 const isReqEnabled = sec.querySelector('.req-enable-check').checked;
+
                 if (isReqEnabled) {
                     const minGrade = parseFloat(sec.querySelector('.req-mini-input').value) || 0;
-                    // Si el promedio de la sección es menor al mínimo exigido
+                    
                     if (promSeccion < minGrade) {
-                        if (!failReason) failReason = secName; // Guardamos el primero que falla
+                        if (!failReason) failReason = secName; 
                     }
                 }
             }
@@ -260,11 +250,10 @@
         if (sumaPesos > 0) final = sumaPonderada / sumaPesos;
         final = final * bonusFactor;
 
-        // Formateo
         const exacto = final.toFixed(1);
         let aprox = ""; 
-        if (final > 7.0) aprox = Math.round(final).toString(); // Escala 100
-        else aprox = final.toFixed(1); // Escala 7.0
+        if (final > 7.0) aprox = Math.round(final).toString();
+        else aprox = final.toFixed(1);
 
         mostrarResultado(exacto, aprox, failReason);
     }
@@ -277,22 +266,21 @@
         divExacto.innerText = exacto;
         divAprox.innerText = `~ ${aprox}`;
 
-        // Lógica de colores y mensajes
         const nota = parseFloat(exacto);
         const apruebaMatematicamente = (nota >= 54.5 || (nota >= 3.95 && nota <= 7.0));
 
         if (failReason) {
-            // Caso: Reprueba por requisito (aunque tenga buena nota)
-            divExacto.style.color = "#e74c3c"; // Rojo
+            divExacto.style.color = "#e74c3c";
             divFail.style.display = "block";
             divFail.innerText = `REPROBADO POR REQUISITO (${failReason})`;
+
         } else {
-            // Caso Normal
+
             divFail.style.display = "none";
             if (apruebaMatematicamente) {
-                divExacto.style.color = "#27ae60"; // Verde
+                divExacto.style.color = "#27ae60";
             } else {
-                divExacto.style.color = "#e74c3c"; // Rojo
+                divExacto.style.color = "#e74c3c";
             }
         }
     }

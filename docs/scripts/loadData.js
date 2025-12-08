@@ -3,11 +3,8 @@ async function cargar() {
     const json = await res.json();
 
     console.log("JSON cargado:", json);
-
-    // Tu JSON es un arreglo, no un objeto con "horarios"
     const horarios = Array.isArray(json) ? json : json.horarios;
 
-    // Si tu JSON tenía updated, lo mostramos
     if (!Array.isArray(json) && json.updated) {
         document.getElementById("updated").innerText =
             "Última actualización: " + json.updated;
