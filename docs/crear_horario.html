@@ -8,8 +8,6 @@
 
     <title>Crear Horario - Salas USM</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-
 </head>
 
 <body>
@@ -31,6 +29,13 @@
             <p style="color: #666; font-style: italic; text-align: center; margin-top: 20px;">
                 Escribe una sigla para buscar.
             </p>
+        </div>
+
+        <div class="added-subjects-container">
+            <h3>Mis Ramos</h3>
+            <div id="lista-mis-ramos">
+                <p class="empty-msg">No has agregado ramos.</p>
+            </div>
         </div>
     </div>
 
@@ -63,7 +68,7 @@
 </div>
 
 <script>
-    // GENERAR TABLA
+    // --- 1. GENERAR TABLA ---
     const bloques = ["1-2","3-4","5-6","7-8","9-10","11-12","13-14","15-16"];
     const tbody = document.getElementById("tabla");
 
@@ -80,7 +85,7 @@
         tbody.appendChild(tr);
     });
 
-    // LOGICA DE DATOS
+    // --- 2. CARGA DE DATOS ---
     let datos = [];
     let ramosUnicos = [];
     let ramosEnHorario = new Set();
@@ -113,7 +118,7 @@
         return "15-16";
     }
 
-    // BUSQUEDA
+    // --- 3. LÓGICA DE BÚSQUEDA ---
     const input = document.getElementById("buscar");
     const limpiarBtn = document.getElementById("limpiar");
     const resultadosDiv = document.getElementById("resultados");
@@ -156,7 +161,9 @@
         });
     });
 
-    // AÑADIR
+    // --- 4. AÑADIR RAMO AL HORARIO ---
+    let misRamosDetalle = [];
+    
     document.addEventListener("click", e => {
         if (!e.target.classList.contains("add-btn")) return;
 
@@ -171,6 +178,18 @@
 
         ramosEnHorario.add(clave);
 
+        // Guardar detalle para la lista lateral
+        const cursoInfo = datos.find(r => r.SIGLA === sigla && r.PARALELO === paralelo);
+        misRamosDetalle.push({
+            clave: clave,
+            sigla: sigla,
+            paralelo: paralelo,
+            nombre: cursoInfo ? cursoInfo.NOMBRE : "Desconocido"
+        });
+        
+        actualizarListaLateral();
+
+        // Dibujar en el horario
         const cursos = datos.filter(r => r.SIGLA === sigla && r.PARALELO === paralelo);
 
         cursos.forEach(r => {
@@ -184,20 +203,69 @@
             if (celda) {
                 const tag = document.createElement("div");
                 tag.className = "ramo";
+                // IMPORTANTE: Esto permite identificar el bloque para borrarlo después
+                tag.setAttribute("data-clave", clave); 
                 tag.innerHTML = `<strong>${r.SIGLA}</strong><br><small>Sala ${r.SALA}</small>`;
                 celda.appendChild(tag);
             }
         });
     });
 
+    // --- 5. ACTUALIZAR LISTA LATERAL & BORRAR ---
+    function actualizarListaLateral() {
+        const contenedor = document.getElementById("lista-mis-ramos");
+        contenedor.innerHTML = "";
+
+        if (misRamosDetalle.length === 0) {
+            contenedor.innerHTML = '<p class="empty-msg">No hay ramos agregados.</p>';
+            return;
+        }
+
+        misRamosDetalle.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "added-item";
+            // Aquí cambiamos el icono por el texto "Eliminar" y aplicamos un estilo inline básico para el texto
+            div.innerHTML = `
+                <div style="flex: 1;">
+                    <strong>${item.sigla}</strong> <small>(P${item.paralelo})</small>
+                </div>
+                <button class="btn-delete-ramo" onclick="eliminarRamo('${item.clave}')" title="Eliminar del horario" style="font-size: 12px; font-weight: bold;">
+                    Eliminar
+                </button>
+            `;
+            contenedor.appendChild(div);
+        });
+    }
+
+    // Función Global para eliminar
+    window.eliminarRamo = function(clave) {
+        // 1. Borrar de la lógica
+        ramosEnHorario.delete(clave);
+        misRamosDetalle = misRamosDetalle.filter(r => r.clave !== clave);
+
+        // 2. Borrar visualmente del horario (lado derecho)
+        // Busca todos los div.ramo que tengan el data-clave correspondiente
+        const bloquesVisuales = document.querySelectorAll(`.ramo[data-clave="${clave}"]`);
+        bloquesVisuales.forEach(el => el.remove());
+
+        // 3. Actualizar la lista lateral
+        actualizarListaLateral();
+    };
+
+    // --- 6. LIMPIAR TODO ---
     document.getElementById("btn-limpiar-horario").onclick = () => {
         if(confirm("¿Borrar todo el horario?")) {
+            // Limpia celdas visuales
             document.querySelectorAll(".cell").forEach(c => c.innerHTML = "");
+            // Limpia datos lógicos
             ramosEnHorario.clear();
+            misRamosDetalle = []; 
+            // Limpia lista lateral
+            actualizarListaLateral(); 
         }
     };
 
-    // DESCARGAR IMAGEN
+    // --- 7. DESCARGAR IMAGEN ---
     document.getElementById("btn-descargar").onclick = () => {
         const elementoParaCapturar = document.getElementById("captura-horario");
         const btn = document.getElementById("btn-descargar");
@@ -215,7 +283,6 @@
             html2canvas(elementoParaCapturar, {
                 backgroundColor: "#1e1e1e",
                 scale: 2,
-                
                 width: elementoParaCapturar.scrollWidth,
                 height: elementoParaCapturar.scrollHeight,
                 windowWidth: elementoParaCapturar.scrollWidth,

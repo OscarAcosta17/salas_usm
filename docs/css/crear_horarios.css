@@ -54,7 +54,8 @@ body {
     min-width: 300px;
     background-color: #2c2c2c; 
     border-right: 1px solid #444;
-    padding: 20px;
+    padding: 15px; 
+    
     position: sticky; 
     top: 60px; 
     height: calc(100vh - 60px);
@@ -66,29 +67,20 @@ body {
     box-shadow: 5px 0 15px rgba(0,0,0,0.3);
     z-index: 10;
 }
-#resultados {
-    flex: 1;
-    overflow-y: auto;
-    margin-top: 10px;
-    padding-right: 5px;
-}
-
-#resultados::-webkit-scrollbar { width: 8px; }
-#resultados::-webkit-scrollbar-track { background: #2c2c2c; }
-#resultados::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
 
 h2 { 
     font-size: 18px; 
-    margin-bottom: 15px; 
+    margin-bottom: 8px; 
     color: #ccc; 
     border-bottom: 1px solid #444; 
-    padding-bottom: 10px;
+    padding-bottom: 8px;
 }
 
 .search-area { 
     display: flex; 
     gap: 8px; 
-    margin-bottom: 20px; }
+    margin-bottom: 10px; 
+}
 
 .search-area input {
     flex: 1; padding: 10px; 
@@ -113,10 +105,22 @@ h2 {
 }
 
 /* --- RESULTADOS --- */
+#resultados {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 5px;
+    padding-right: 5px;
+    min-height: 100px; 
+}
+
+#resultados::-webkit-scrollbar { width: 8px; }
+#resultados::-webkit-scrollbar-track { background: #2c2c2c; }
+#resultados::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
+
 .result-item {
     background: #3a3a3a; 
-    padding: 15px; 
-    margin-bottom: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
     border-radius: 8px; 
     font-size: 13px; 
     border-left: 4px solid #555;
@@ -127,9 +131,9 @@ h2 {
 .result-item:hover { background: #444; border-left-color: #3498db; }
 
 .add-btn {
-    margin-top: 12px; 
+    margin-top: 10px; 
     width: 100%; 
-    padding: 8px 0;
+    padding: 6px 0;
     background: #3498db; 
     border: none; 
     color: white;
@@ -141,6 +145,87 @@ h2 {
     transition: background 0.2s;
 }
 .add-btn:hover { background: #2980b9; }
+
+
+/* --- PANEL ABAJO: MIS RAMOS --- */
+.added-subjects-container {
+    border-top: 1px solid #444;
+    padding-top: 15px;
+    margin-top: 10px;
+    background-color: #222;
+    
+    
+    margin-left: -15px; 
+    margin-right: -15px;
+    margin-bottom: -15px;
+    
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 15px;
+    
+    flex-shrink: 0; 
+    max-height: 45%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.2);
+}
+
+.added-subjects-container h3 {
+    font-size: 15px;
+    color: #3498db;
+    margin-bottom: 8px;
+}
+
+#lista-mis-ramos {
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 5px;
+}
+/* Scrollbar para la lista de mis ramos */
+#lista-mis-ramos::-webkit-scrollbar { width: 6px; }
+#lista-mis-ramos::-webkit-scrollbar-track { background: #222; }
+#lista-mis-ramos::-webkit-scrollbar-thumb { background-color: #444; border-radius: 3px; }
+
+
+/* Estilo de cada item en la lista de agregados */
+.added-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    border-left: 3px solid #27ae60;
+}
+
+.added-item span { color: #eee; }
+
+.btn-delete-ramo {
+    background: #c0392b;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    margin-left: 8px;
+}
+
+.btn-delete-ramo:hover {
+    background-color: #e74c3c;
+}
+
+.empty-msg {
+    color: #666;
+    font-style: italic;
+    font-size: 12px;
+    text-align: center;
+    padding-top: 10px;
+}
 
 /* --- PANEL DERECHO (HORARIO) --- */
 .right-panel {
@@ -166,30 +251,21 @@ h2 {
 
 .btn-group { display: flex; gap: 10px; }
 
-#btn-limpiar-horario {
+#btn-limpiar-horario, #btn-descargar {
     padding: 8px 16px; 
-    background: #c0392b; 
-    color: white;
     border: none; 
     border-radius: 6px; 
     cursor: pointer;
     font-weight: 500; 
     font-size: 14px; 
     transition: 0.2s;
+    color: white;
 }
+
+#btn-limpiar-horario { background: #c0392b; }
 #btn-limpiar-horario:hover { background: #e74c3c; }
 
-#btn-descargar {
-    padding: 8px 16px; 
-    background: #27ae60; 
-    color: white;
-    border: none; 
-    border-radius: 6px; 
-    cursor: pointer;
-    font-weight: 500; 
-    font-size: 14px; 
-    transition: 0.2s;
-}
+#btn-descargar { background: #27ae60; }
 #btn-descargar:hover { background: #2ecc71; }
 
 /* --- TABLA --- */
@@ -206,8 +282,7 @@ h2 {
 
 table { 
     width: 100%; 
-    border-collapse: 
-    collapse; 
+    border-collapse: collapse; 
     background: #1e1e1e; 
     min-width: 600px;
 }
@@ -257,36 +332,80 @@ td:first-child {
 
 
 @media (max-width: 768px) {
-    .container { flex-direction: column; }
+    .container {
+        flex-direction: column;
+        height: auto; 
+        overflow-y: visible; 
+    }   
 
-    /* Panel Izquierdo */
     .left-panel {
         width: 100%;
-        min-width: 0;
+        max-height: none;
         height: auto;
-        display: flex;
-        flex-direction: column;
-        max-height: 40vh;
-        position: relative; 
-        top: 0; border-right: none;
-        border-bottom: 1px solid #444; 
-        overflow: hidden;
+        position: relative;
+        border-right: none;
+        border-bottom: 4px solid #1f1f1f;
+        padding: 15px;
+        z-index: 10;
+        background-color: #2c2c2c;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
-    .right-panel { padding: 20px 10px; }
+    #resultados {
+        max-height: 200px; 
+        min-height: 0;
+    }
 
-    /* Controles del horario */
-    .schedule-controls { flex-direction: column; align-items: stretch; text-align: center; }
-    .btn-group { justify-content: center; width: 100%; }
-    .btn-group button { flex: 1; }
+    .right-panel {
+        padding: 20px 10px;
+        background-color: #121212;
+        min-height: 500px;
+    }
+    .schedule-controls h2 {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 15px;
+        font-size: 20px;
+        color: #3498db;
+        border-bottom: none;
+    }
+    .schedule-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .btn-group {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .btn-group button {
+        flex: 1;
+        padding: 12px;
+        font-size: 14px;
+    }
 
     input[type="text"] { font-size: 16px; }
 
     .table-container {
-        overflow-x: auto; 
-        border-radius: 4px;
+        width: 100%;
+        margin-top: 10px;
+        border: 1px solid #333;
+        background: 
+            linear-gradient(to right, #1e1e1e 30%, rgba(255, 255, 255, 0)),
+            linear-gradient(to right, rgba(255, 255, 255, 0), #1e1e1e 70%) 0 100%,
+            radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, .4), rgba(0, 0, 0, 0)),
+            radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, .4), rgba(0, 0, 0, 0)) 0 100%;
+        background-repeat: no-repeat;
+        background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+        background-attachment: local, local, scroll, scroll;
     }
-    
-    th, td { font-size: 12px; padding: 4px; }
-    .ramo { font-size: 10px; }
+    th, td { font-size: 11px; padding: 4px 2px; }
+    .ramo { font-size: 9px; padding: 2px; }
+
+    .added-subjects-container {
+        max-height: 180px;
+        margin-top: 15px;
+        border-top: 1px solid #555;
+    }
 }
