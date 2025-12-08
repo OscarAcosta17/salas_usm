@@ -55,17 +55,27 @@ body {
     background-color: #2c2c2c; 
     border-right: 1px solid #444;
     padding: 20px;
-    position: sticky; top: 60px; 
+    position: sticky; 
+    top: 60px; 
     height: calc(100vh - 60px);
-    overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    
     box-shadow: 5px 0 15px rgba(0,0,0,0.3);
     z-index: 10;
 }
+#resultados {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 10px;
+    padding-right: 5px;
+}
 
-/* Estilo Scrollbar */
-.left-panel::-webkit-scrollbar { width: 8px; }
-.left-panel::-webkit-scrollbar-track { background: #2c2c2c; }
-.left-panel::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
+#resultados::-webkit-scrollbar { width: 8px; }
+#resultados::-webkit-scrollbar-track { background: #2c2c2c; }
+#resultados::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
 
 h2 { 
     font-size: 18px; 
@@ -253,12 +263,14 @@ td:first-child {
     .left-panel {
         width: 100%;
         min-width: 0;
-         height: auto; 
-         max-height: 40vh;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        max-height: 40vh;
         position: relative; 
         top: 0; border-right: none;
         border-bottom: 1px solid #444; 
-        overflow-y: auto;
+        overflow: hidden;
     }
 
     .right-panel { padding: 20px 10px; }

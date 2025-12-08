@@ -50,7 +50,16 @@
             <input type="number" id="bonus-factor" class="input-bonus" min="0" step="0.01" value="1" placeholder="Ej: 1.1">
         </div>
 
-        <button class="btn-generar" onclick="generarFormulario()">Generar Casillas</button>
+        <div class="action-buttons-container">
+            <button class="btn-generar" onclick="generarFormulario()">Generar Casillas</button>
+            
+            <button class="btn-reset" onclick="resetConfig()" title="Restablecer configuración">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+            </button>
+        </div>
     </div>
 
     <div class="right-panel">
@@ -150,11 +159,15 @@
     }
 
     function generarInputs(n, titulo) {
+        let singular = titulo.slice(0, -1);
+        if (titulo === "Certámenes") singular = "Certamen";
+        if (titulo === "Controles") singular = "Control";
+
         let html = '';
         for (let i = 1; i <= n; i++) {
             html += `
                 <div class="grade-item">
-                    <label>${titulo.slice(0, -1)} ${i}</label>
+                    <label>${singular} ${i}</label>
                     <div class="input-row">
                         <input type="number" class="input-nota" placeholder="Nota" step="0.1">
                         <input type="number" class="input-peso" placeholder="%">
@@ -286,6 +299,18 @@
     }
 
     window.onload = generarFormulario;
+
+    function resetConfig() {
+        document.getElementById('num-cert').value = 2;
+        document.getElementById('num-tar').value = 0;
+        document.getElementById('bonus-factor').value = 1;
+
+        const masterCheck = document.getElementById('master-req-check');
+        masterCheck.checked = false;
+
+        toggleMasterReq();
+        generarFormulario();
+    }
 </script>
 
 </body>

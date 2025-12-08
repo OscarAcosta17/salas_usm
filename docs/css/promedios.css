@@ -314,10 +314,41 @@ input[type="checkbox"] {
     
     .section-card { padding: 15px; }
     
-    /* Evita zoom en iOS */
     input[type="number"], input[type="text"], select { font-size: 16px; }
     
     .calc-footer { flex-direction: column; gap: 15px; text-align: center; }
     .result-display { width: 100%; align-items: center; }
     .btn-calcular { width: 100%; }
+}
+
+.action-buttons-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.btn-generar {
+    flex-grow: 1;
+    margin-top: 0;
+}
+
+.btn-reset {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #e74c3c;
+    transition: all 0.2s ease;
+}
+
+.btn-reset:hover {
+    background-color: #e74c3c;
+    color: white;
+    border-color: #e74c3c;
 }
