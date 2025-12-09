@@ -1,7 +1,7 @@
 # 🎓 Salas USM: Plataforma de Gestión Académica Integral
 
 ![Estado del Proyecto](https://img.shields.io/badge/Estado-Finalizado-success)
-![Versión](https://img.shields.io/badge/Versión-1.1.0-blue)
+![Versión](https://img.shields.io/badge/Versión-1.1.1-blue)
 ![Licencia](https://img.shields.io/badge/Licencia-MIT-green)
 
 ## 📄 Descripción del Proyecto
