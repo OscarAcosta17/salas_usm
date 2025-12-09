@@ -46,6 +46,8 @@ async function cargar() {
     renderTabla();
 
     document.getElementById("filtro-dia").onchange = renderTabla;
+    document.getElementById("filtro-sigla").onchange = renderTabla;
+    document.getElementById("filtro-nombre").onchange = renderTabla;
     document.getElementById("filtro-sala").oninput = renderTabla;
     document.getElementById("filtro-profe").oninput = renderTabla;
     document.getElementById("filtro-depto").oninput = renderTabla;
@@ -54,6 +56,8 @@ async function cargar() {
 
     function renderTabla() {
         const diaFiltro = document.getElementById("filtro-dia").value;
+        const siglaFiltro = document.getElementById("filtro-sigla").value;
+        const nombreFiltro = document.getElementById("filtro-nombre").value.toLowerCase();
         const salaFiltro = document.getElementById("filtro-sala").value.toLowerCase();
         const profeFiltro = document.getElementById("filtro-profe").value.toLowerCase();
         const deptoFiltro = document.getElementById("filtro-depto").value.toLowerCase();
@@ -63,6 +67,8 @@ async function cargar() {
         horarios
             .filter(h =>
                 (diaFiltro === "" || h.DIA === diaFiltro) &&
+                (siglaFiltroFiltro === "" || h.SIGLA === siglaFiltro) &&
+                (nombreFiltro === "" || h.NOMBRE === nombreFiltro) &&
                 (salaFiltro === "" || h.SALA.toLowerCase().includes(salaFiltro)) &&
                 (profeFiltro === "" || h.PROFESOR.toLowerCase().includes(profeFiltro)) &&
                 (deptoFiltro === "" || h.DEPTO.toLowerCase().includes(deptoFiltro))
@@ -86,6 +92,8 @@ async function cargar() {
 
     document.getElementById("btn-limpiar").onclick = () => {
         document.getElementById("filtro-dia").value = "";
+        document.getElementById("filtro-sigla").value = "";
+        document.getElementById("filtro-nombre").value = "";
         document.getElementById("filtro-sala").value = "";
         document.getElementById("filtro-profe").value = "";
         document.getElementById("filtro-depto").value = "";

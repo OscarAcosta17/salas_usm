@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora USM - Requisitos Dinámicos</title>
     <link rel="stylesheet" href="css/promedios.css">
+    
 </head>
 
 <body>
@@ -19,40 +20,45 @@
     <div class="left-panel">
         <h2>Configuración</h2>
 
-        <div class="config-group">
-            <label>N° de Certámenes</label>
-            <input type="number" id="num-cert" min="0" max="10" value="2">
+        <div class="grid-row">
+            <div class="config-group">
+                <label>N° Certámenes</label>
+                <input type="number" id="num-cert" min="0" max="10" value="2">
+            </div>
+            <div class="config-group">
+                <label>N° Controles</label>
+                <input type="number" id="num-ctrl" min="0" max="20" value="0">
+            </div>
         </div>
 
-        <div class="config-group">
-            <label>N° de Controles</label>
-            <input type="number" id="num-ctrl" min="0" max="20" value="0">
+        <div class="grid-row">
+            <div class="config-group">
+                <label>N° Tareas</label>
+                <input type="number" id="num-tar" min="0" max="20" value="0">
+            </div>
+            <div class="config-group">
+                <label style="color: #f39c12;">Bonus</label>
+                <input type="number" id="bonus-factor" class="input-bonus" min="0" step="0.01" value="1" placeholder="Ej: 1.1">
+            </div>
         </div>
 
-        <div class="config-group">
-            <label>N° de Tareas</label>
-            <input type="number" id="num-tar" min="0" max="20" value="0">
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
+        <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
+        
         <div class="config-group">
             <input type="checkbox" id="master-req-check" onchange="toggleMasterReq()">
-            
             <label for="master-req-check" class="btn-toggle-req">
                 Requisitos de nota
             </label>
         </div>
-        
-        <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
-
         <div class="config-group">
-            <label style="color: #f39c12;">Bonus Final</label>
-            <input type="number" id="bonus-factor" class="input-bonus" min="0" step="0.01" value="1" placeholder="Ej: 1.1">
+            <input type="checkbox" id="global-active-check" onchange="toggleGlobalBlock()">
+            <label for="global-active-check" class="btn-toggle-req">
+                Habilitar Global
+            </label>
         </div>
-
+        
         <div class="action-buttons-container">
-            <button class="btn-generar" onclick="generarFormulario()">Generar Casillas</button>
-            
+            <button class="btn-generar" onclick="generarFormulario()">Generar casillas</button>
             <button class="btn-reset" onclick="resetConfig()" title="Restablecer configuración">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
@@ -64,7 +70,7 @@
 
     <div class="right-panel">
         <div id="contenedor-inputs" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-            <p style="color: #666;">Configura y pulsa "Generar Casillas".</p>
+            <p style="color: #666;">Configura y pulsa "Generar".</p>
         </div>
 
         <div id="barra-calculo" class="calc-footer" style="display: none;">
@@ -76,16 +82,58 @@
                 <div id="fail-msg" class="fail-msg">REPROBADO POR REQUISITO</div>
             </div>
         </div>
+
+        <div id="global-block" class="global-options-container">
+            <div class="global-header">Configuración Global</div>
+            
+            <div class="global-modes">
+                <label>
+                    <input type="radio" name="global-mode" value="replace" checked onchange="updateGlobalUI()">
+                    Reemplaza peor nota
+                </label>
+                <label>
+                    <input type="radio" name="global-mode" value="multiply" onchange="updateGlobalUI()">
+                    Multiplica promedio
+                </label>
+            </div>
+
+            <div class="global-input-wrapper">
+                <div class="global-input-box">
+                    <label>Nota Global</label>
+                    <input type="number" id="global-grade" placeholder="Nota" step="0.1">
+                </div>
+                
+                <div class="global-input-box" id="global-percent-box" style="display: none;">
+                    <label>% Global</label>
+                    <input type="number" id="global-weight" placeholder="Ej: 30" min="0" max="100">
+                </div>
+            </div>
+
+            <div class="global-hint" id="global-hint-text">
+                Se calculará reemplazando la nota numérica más baja ingresada por la nota del Global.
+            </div>
+
+            <button class="btn-calcular-global" onclick="calcularPromedioGlobal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16l5 5v-5"/></svg>
+                Calcular Nuevo Promedio
+            </button>
+
+            <div id="global-result-display" class="global-result-box">
+                <div class="global-result-label">NUEVO PROMEDIO (CON GLOBAL)</div>
+                <div class="global-result-value" id="global-val-exacto">--</div>
+                <div class="global-result-approx" id="global-val-aprox">--</div>
+            </div>
+
+        </div>
+
     </div>
 
 </div>
 
 <script>
-    // 1. CONTROL VISUAL: Mostrar/Ocultar bloques amarillos
     function toggleMasterReq() {
         const isMasterActive = document.getElementById('master-req-check').checked;
         const reqBlocks = document.querySelectorAll('.req-warning-block');
-        
         reqBlocks.forEach(block => {
             block.style.display = isMasterActive ? 'flex' : 'none';
         });
@@ -97,6 +145,34 @@
         inputContainer.style.display = checkbox.checked ? 'flex' : 'none';
     }
 
+    function toggleGlobalBlock() {
+        const isActive = document.getElementById('global-active-check').checked;
+        const globalBlock = document.getElementById('global-block');
+        const inputsVisible = document.getElementById('barra-calculo').style.display !== 'none';
+        
+        if (isActive && inputsVisible) {
+            globalBlock.style.display = 'block';
+        } else {
+            globalBlock.style.display = 'none';
+            document.getElementById('global-result-display').style.display = 'none';
+        }
+    }
+
+    function updateGlobalUI() {
+        const mode = document.querySelector('input[name="global-mode"]:checked').value;
+        const percentBox = document.getElementById('global-percent-box');
+        const hintText = document.getElementById('global-hint-text');
+
+        if (mode === 'multiply') {
+            percentBox.style.display = 'block';
+            hintText.innerText = "Fórmula: (NotaGlobal × %Global) + (PromedioOriginal × (100% - %Global))";
+        } else {
+            percentBox.style.display = 'none';
+            hintText.innerText = "Se calculará reemplazando la nota numérica más baja ingresada por la nota del Global.";
+        }
+    }
+
+    // GENERACIÓN DE CASILLAS
     function generarFormulario() {
         const nCert = parseInt(document.getElementById('num-cert').value) || 0;
         const nCtrl = parseInt(document.getElementById('num-ctrl').value) || 0;
@@ -114,8 +190,10 @@
             barra.style.display = 'flex';
             resetResultados();
             toggleMasterReq(); 
+            toggleGlobalBlock();
         } else {
             barra.style.display = 'none';
+            document.getElementById('global-block').style.display = 'none';
             contenedor.innerHTML = '<p style="color: #666;">Selecciona una cantidad mayor a 0.</p>';
         }
     }
@@ -135,7 +213,7 @@
                 </div>
             </div>
 
-            <div class="req-warning-block">
+            <div class="req-warning-block" style="display:none;">
                 <label class="req-inner-label">
                     <input type="checkbox" class="req-enable-check" onchange="toggleInnerReq(this)">
                     ¿Hay requisito de ${titulo}?
@@ -156,6 +234,7 @@
             </div>
         `;
         padre.appendChild(card);
+        toggleMasterReq();
     }
 
     function generarInputs(n, titulo) {
@@ -198,20 +277,101 @@
         document.getElementById('val-exacto').innerText = "--";
         document.getElementById('val-aprox').innerText = "--";
         document.getElementById('fail-msg').style.display = "none";
+        document.getElementById('global-result-display').style.display = 'none';
     }
 
     function calcularPromedio() {
-        const secciones = document.querySelectorAll('.section-card');
-        const bonusFactor = parseFloat(document.getElementById('bonus-factor').value) || 1;
-        const masterReqActive = document.getElementById('master-req-check').checked;
+        let finalAvg = calculateBaseAverage(null, null);
 
+        const bonusFactor = parseFloat(document.getElementById('bonus-factor').value) || 1;
+        finalAvg = finalAvg * bonusFactor;
+
+        const exacto = finalAvg.toFixed(1);
+        let aprox = "";
+        if (finalAvg > 7.0) aprox = Math.round(finalAvg).toString();
+        else aprox = finalAvg.toFixed(1);
+
+        const failReason = checkRequisitos(); 
+        mostrarResultado(exacto, aprox, failReason);
+    }
+
+    function calcularPromedioGlobal() {
+        const globalMode = document.querySelector('input[name="global-mode"]:checked').value;
+        const globalGrade = parseFloat(document.getElementById('global-grade').value);
+        const globalWeight = parseFloat(document.getElementById('global-weight').value); 
+
+        if (isNaN(globalGrade)) {
+            alert("Por favor ingrese una nota para el Global");
+            return;
+        }
+
+        let finalAvg = 0;
+
+        if (globalMode === 'replace') {
+            const worstInput = findWorstGradeInput();
+            finalAvg = calculateBaseAverage(worstInput, globalGrade);
+        } 
+        else if (globalMode === 'multiply') {
+            finalAvg = calculateBaseAverage(null, null);
+            
+            if (!isNaN(globalWeight)) {
+                const pGlobal = globalWeight / 100;
+                const pOriginal = 1 - pGlobal;
+                finalAvg = (globalGrade * pGlobal) + (finalAvg * pOriginal);
+            }
+        }
+
+        const bonusFactor = parseFloat(document.getElementById('bonus-factor').value) || 1;
+        finalAvg = finalAvg * bonusFactor;
+        mostrarResultadoGlobal(finalAvg);
+    }
+
+    function mostrarResultadoGlobal(finalVal) {
+        const divDisplay = document.getElementById('global-result-display');
+        const divExacto = document.getElementById('global-val-exacto');
+        const divAprox = document.getElementById('global-val-aprox');
+
+        const exacto = finalVal.toFixed(1);
+        let aprox = "";
+        if (finalVal > 7.0) aprox = Math.round(finalVal).toString();
+        else aprox = finalVal.toFixed(1);
+
+        divExacto.innerText = exacto;
+        divAprox.innerText = `~ ${aprox}`;
+
+        const nota = parseFloat(exacto);
+        const aprueba = (nota >= 54.5 || (nota >= 3.95 && nota <= 7.0));
+
+        if(aprueba) divExacto.style.color = "#2ecc71";
+        else divExacto.style.color = "#e74c3c"; 
+
+        divDisplay.style.display = 'block';
+    }
+
+    function findWorstGradeInput() {
+        let minVal = Infinity;
+        let targetInput = null;
+        const allInputs = document.querySelectorAll('.input-nota');
+        
+        allInputs.forEach(inp => {
+            const val = parseFloat(inp.value);
+            if (!isNaN(val)) {
+                if (val < minVal) {
+                    minVal = val;
+                    targetInput = inp;
+                }
+            }
+        });
+        return targetInput;
+    }
+
+    function calculateBaseAverage(overrideInput, overrideValue) {
+        const secciones = document.querySelectorAll('.section-card');
         let sumaPonderada = 0;
         let sumaPesos = 0;
-        let failReason = null;
 
         secciones.forEach(sec => {
             const idBase = sec.getAttribute('data-section-id');
-            const secName = sec.getAttribute('data-section-name');
             const modo = sec.querySelector(`input[name="mode_${idBase}"]:checked`).value;
             const notasInputs = sec.querySelectorAll('.input-nota');
             
@@ -222,7 +382,12 @@
                 pesoSeccion = parseFloat(sec.querySelector('.input-global-peso').value) || 0;
                 let s = 0, c = 0;
                 notasInputs.forEach(i => {
-                    const v = parseFloat(i.value);
+                    let v = parseFloat(i.value);
+
+                    if (overrideInput && i === overrideInput) {
+                        v = overrideValue;
+                    }
+
                     if (!isNaN(v)) { s += v; c++; }
                 });
                 if (c > 0) promSeccion = s / c;
@@ -232,8 +397,13 @@
                 let sP = 0, sW = 0;
 
                 for(let i=0; i<notasInputs.length; i++){
-                    const v = parseFloat(notasInputs[i].value);
+                    let v = parseFloat(notasInputs[i].value);
                     const w = parseFloat(pesosInputs[i].value);
+                    
+                    if (overrideInput && notasInputs[i] === overrideInput) {
+                        v = overrideValue;
+                    }
+
                     if(!isNaN(v) && !isNaN(w)) { sP += v*w; sW += w; }
                 }
                 if(sW > 0) {
@@ -242,33 +412,51 @@
                 }
             }
 
-            if (masterReqActive) {
-                const isReqEnabled = sec.querySelector('.req-enable-check').checked;
-
-                if (isReqEnabled) {
-                    const minGrade = parseFloat(sec.querySelector('.req-mini-input').value) || 0;
-                    
-                    if (promSeccion < minGrade) {
-                        if (!failReason) failReason = secName; 
-                    }
-                }
-            }
-
             sumaPonderada += promSeccion * pesoSeccion;
             sumaPesos += pesoSeccion;
         });
 
-        // --- RESULTADO FINAL ---
-        let final = 0;
-        if (sumaPesos > 0) final = sumaPonderada / sumaPesos;
-        final = final * bonusFactor;
+        if (sumaPesos > 0) return sumaPonderada / sumaPesos;
+        return 0;
+    }
 
-        const exacto = final.toFixed(1);
-        let aprox = ""; 
-        if (final > 7.0) aprox = Math.round(final).toString();
-        else aprox = final.toFixed(1);
+    function checkRequisitos() {
+        const masterReq = document.getElementById('master-req-check').checked;
+        if (!masterReq) return null;
 
-        mostrarResultado(exacto, aprox, failReason);
+        let reason = null;
+        const secciones = document.querySelectorAll('.section-card');
+        
+        secciones.forEach(sec => {
+            if (reason) return;
+            const check = sec.querySelector('.req-enable-check');
+            if (check && check.checked) {
+                
+                const idBase = sec.getAttribute('data-section-id');
+                const notasInputs = sec.querySelectorAll('.input-nota');
+                const modo = sec.querySelector(`input[name="mode_${idBase}"]:checked`).value;
+                let prom = 0;
+                
+                if (modo === 'global') {
+                    let s=0, c=0;
+                    notasInputs.forEach(i=>{let v=parseFloat(i.value); if(!isNaN(v)){s+=v;c++;}});
+                    if(c>0) prom=s/c;
+                } else {
+                    const pesosInputs = sec.querySelectorAll('.input-peso');
+                    let sP=0, sW=0;
+                    for(let i=0; i<notasInputs.length; i++){
+                        let v=parseFloat(notasInputs[i].value);
+                        let w=parseFloat(pesosInputs[i].value);
+                        if(!isNaN(v)&&!isNaN(w)){sP+=v*w; sW+=w;}
+                    }
+                    if(sW>0) prom=sP/sW;
+                }
+                
+                const min = parseFloat(sec.querySelector('.req-mini-input').value)||0;
+                if(prom < min) reason = sec.getAttribute('data-section-name');
+            }
+        });
+        return reason;
     }
 
     function mostrarResultado(exacto, aprox, failReason) {
@@ -286,9 +474,7 @@
             divExacto.style.color = "#e74c3c";
             divFail.style.display = "block";
             divFail.innerText = `REPROBADO POR REQUISITO (${failReason})`;
-
         } else {
-
             divFail.style.display = "none";
             if (apruebaMatematicamente) {
                 divExacto.style.color = "#27ae60";
@@ -298,19 +484,18 @@
         }
     }
 
-    window.onload = generarFormulario;
-
     function resetConfig() {
         document.getElementById('num-cert').value = 2;
         document.getElementById('num-tar').value = 0;
         document.getElementById('bonus-factor').value = 1;
+        document.getElementById('master-req-check').checked = false;
+        document.getElementById('global-active-check').checked = false;
 
-        const masterCheck = document.getElementById('master-req-check');
-        masterCheck.checked = false;
-
-        toggleMasterReq();
         generarFormulario();
     }
+
+    window.onload = generarFormulario;
+
 </script>
 
 </body>
